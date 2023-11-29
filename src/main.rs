@@ -1,4 +1,5 @@
 use std::fmt::{Debug, Display, Formatter};
+use std::num::ParseIntError;
 use std::str::FromStr;
 
 pub mod year2019;
@@ -49,6 +50,12 @@ pub enum Error {
     NoSolutionFound
 }
 
+impl From<ParseIntError> for Error {
+    fn from(value: ParseIntError) -> Self {
+        Error::StringParse(value.to_string())
+    }
+}
+
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", match self {
@@ -61,9 +68,9 @@ impl Display for Error {
 impl std::error::Error for Error { }
 
 fn main() -> anyhow::Result<()> {
-    type CurrentDay = year2019::day02::Day;
+    type CurrentDay = year2019::day04::Day;
 
-    let mut day = CurrentDay::from_str(include_str!("./year2019/day02/input.txt"))?;
+    let mut day = CurrentDay::from_str(include_str!("./year2019/day04/input.txt"))?;
 
     day.test_1()?;
     day.after_test_1();
