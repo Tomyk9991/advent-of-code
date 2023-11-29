@@ -68,9 +68,9 @@ impl Display for Error {
 impl std::error::Error for Error { }
 
 fn main() -> anyhow::Result<()> {
-    type CurrentDay = year2019::day04::Day;
+    type CurrentDay = year2019::day05::Day;
 
-    let mut day = CurrentDay::from_str(include_str!("./year2019/day04/input.txt"))?;
+    let mut day = CurrentDay::from_str(include_str!("./year2019/day05/input.txt"))?;
 
     day.test_1()?;
     day.after_test_1();

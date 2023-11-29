@@ -85,22 +85,6 @@ impl crate::Day for Day {
         Err(Error::NoSolutionFound.into())
     }
 }
-//     fn solution2(&self) -> anyhow::Result<Box<dyn Display>> {
-//         let mut day: Day = Day::default();
-//         let target_string = "19690720".to_string();
-//
-//         for i in 0..=99 {
-//             for j in 0..=99 {
-//                 day.parameter = (i, j);
-//                 if target_string == format!("{}", day.solution1()?) {
-//                     return Ok(Box::new(format!("i: {i} j: {j}: 100 * {i} + {j} = {}", 100 * i + j)))
-//                 }
-//             }
-//         }
-//
-//         return Ok(Box::new(String::new()))
-//     }
-// }
 
 impl FromStr for Day {
     type Err = Error;
