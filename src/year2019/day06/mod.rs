@@ -1,21 +1,44 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::fmt::{Debug, Formatter};
+use std::rc::{Rc, Weak};
 use std::str::FromStr;
 use crate::Error;
 
 #[derive(Default, Clone, Debug)]
 pub struct Day {
-    com: Node
+    com: Rc<RefCell<Node>>
 }
 
-#[derive(Default, Clone, Debug)]
+impl Debug for Node {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let parent_name = if let Some(parent) = &self.parent {
+            if let Some(p) = parent.upgrade() {
+                p.borrow().value.clone()
+            } else {
+                "Weak Ref not found".to_string()
+            }
+        } else {
+            "None".to_string()
+        };
+
+        f.debug_struct("Node")
+            .field("value", &self.value)
+            .field("parent", &parent_name)
+            .field("children", &self.children)
+            .finish()
+    }
+}
+
+#[derive(Default, Clone)]
 pub struct Node {
     value: String,
-    children: Vec<Rc<Node>>
+    parent: Option<Weak<RefCell<Node>>>,
+    children: Vec<Rc<RefCell<Node>>>
 }
 
 impl crate::Day for Day {
-    type Output = i32;
+    type Output = usize;
 
     fn test_cases_1() -> Vec<(&'static str, Self::Output)> {
         vec![
@@ -30,6 +53,8 @@ impl crate::Day for Day {
     fn solution1(&mut self) -> anyhow::Result<Self::Output> {
         println!("{:#?}", self.com);
 
+        let counts = count_all_child_to_root_path_lengths(self.com.clone());
+
         Ok(0)
     }
 
@@ -38,23 +63,61 @@ impl crate::Day for Day {
     }
 }
 
-fn create_node(map: &HashMap<&str, Vec<&str>>, name: &str) -> Node {
+fn count_all_child_to_root_path_lengths(root: Rc<RefCell<Node>>) -> usize {
+    let mut current = root;
+
+    let mut sum = 0;
+    let children = current.borrow().children.clone();
+
+    for child in children {
+        let direct_and_indirect_orbits = traverse_from_child_to_root(Rc::clone(&child));
+        sum += direct_and_indirect_orbits;
+        println!("{}", direct_and_indirect_orbits);
+        current = Rc::clone(&child);
+    }
+
+    return sum;
+}
+
+fn traverse_from_child_to_root(child: Rc<RefCell<Node>>) -> usize {
+    let mut counter = 0;
+    let mut current_node = Some(child);
+
+    while let Some(node) = current_node {
+        if let Some(weak_parent) = node.borrow().parent.clone() {
+            current_node = Weak::upgrade(&weak_parent);
+            counter += 1;
+        } else {
+            current_node = None;
+        }
+    }
+
+    counter
+}
+
+fn create_node(map: &HashMap<&str, Vec<&str>>, name: &str, parent: Option<Weak<RefCell<Node>>>) -> Rc<RefCell<Node>> {
     return if let Some(pointers) = map.get(name) {
         let mut children = vec![];
 
+        let mut child_parent = Rc::new(RefCell::new(Node {
+            value: name.to_string(),
+            parent,
+            children,
+        }));
+
         for child_name in pointers {
-            children.push(Rc::new(create_node(map, *child_name)));
+            let child = create_node(map, *child_name, Some(Weak::clone(&Rc::downgrade(&child_parent))));
+            child_parent.borrow_mut().children.push(child);
+            break;
         }
 
-        Node {
+        child_parent
+    } else { // end of tree
+        Rc::new(RefCell::new(Node {
             value: name.to_string(),
-            children,
-        }
-    } else {
-        Node {
-            value: name.to_string(),
+            parent,
             children: vec![],
-        }
+        }))
     }
 }
 
@@ -79,7 +142,7 @@ impl FromStr for Day {
             }
         }
 
-        let com = create_node(&hashmap, "COM");
+        let com = create_node(&hashmap, "COM", None);
 
         Ok(Self {
             com,
