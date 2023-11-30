@@ -1,13 +1,14 @@
 use std::cell::RefCell;
-use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::fmt::{Debug, Formatter};
 use std::rc::{Rc, Weak};
 use std::str::FromStr;
+
 use crate::Error;
 
 #[derive(Default, Clone, Debug)]
 pub struct Day {
-    com: Rc<RefCell<Node>>
+    com: Rc<RefCell<Node>>,
 }
 
 impl Debug for Node {
@@ -34,7 +35,7 @@ impl Debug for Node {
 pub struct Node {
     value: String,
     parent: Option<Weak<RefCell<Node>>>,
-    children: Vec<Rc<RefCell<Node>>>
+    children: Vec<Rc<RefCell<Node>>>,
 }
 
 impl crate::Day for Day {
@@ -47,7 +48,7 @@ impl crate::Day for Day {
     }
 
     fn test_cases_2() -> Vec<(&'static str, Self::Output)> {
-        vec![]
+        vec![("COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L\nK)YOU\nI)SAN", 4)]
     }
 
     fn solution1(&mut self) -> anyhow::Result<Self::Output> {
@@ -57,8 +58,69 @@ impl crate::Day for Day {
     }
 
     fn solution2(&mut self) -> anyhow::Result<Self::Output> {
-        todo!()
+        let start = search_in_tree(&self.com, "YOU");
+        let end = search_in_tree(&self.com, "SAN");
+
+        if let (Some(start), Some(end)) = (start, end) {
+            let path = breadth_first_search(start, end);
+            return Ok(path.len() - 3)
+        }
+
+        Ok(0)
     }
+}
+
+
+fn breadth_first_search(start: Rc<RefCell<Node>>, end: Rc<RefCell<Node>>) -> Vec<Rc<RefCell<Node>>> {
+    let mut visited = HashMap::new();
+    let mut queue = VecDeque::new();
+    queue.push_back((start.clone(), None));
+
+    while let Some((current, parent)) = queue.pop_front() {
+        if Rc::ptr_eq(&current, &end) {
+            let mut path = vec![current.clone()];
+            let mut previous: Option<Rc<RefCell<Node>>> = parent;
+
+            // backtrace from 'end' node to 'start'
+            while let Some(prev_node) = previous {
+                path.push(prev_node.clone());
+                let s = visited.get(&(Rc::as_ptr(&prev_node)));
+                if let Some(s) = s {
+                    previous = Some(Rc::clone(s));
+                } else {
+                    previous = None;
+                }
+
+                if Rc::ptr_eq(&prev_node, &start) {
+                    break;
+                }
+            }
+
+            path.reverse();
+            return path;
+        }
+
+        if let Some(parent) = parent {
+            visited.insert(Rc::as_ptr(&current), Rc::clone(&parent));
+        }
+
+        let current_borrow = current.borrow();
+
+        if let Some(ref parent_weak) = current_borrow.parent {
+            let parent = parent_weak.upgrade().unwrap();
+            if !visited.contains_key(&Rc::as_ptr(&parent)) {
+                queue.push_back((parent.clone(), Some(Rc::clone(&current))));
+            }
+        }
+
+        for child in &current_borrow.children {
+            if !visited.contains_key(&Rc::as_ptr(child)) {
+                queue.push_back((child.clone(), Some(Rc::clone(&current))));
+            }
+        }
+    }
+
+    Vec::new() // Return empty vector if no path found
 }
 
 fn count_all_child_to_root_path_lengths(root: Rc<RefCell<Node>>) -> usize {
@@ -67,7 +129,6 @@ fn count_all_child_to_root_path_lengths(root: Rc<RefCell<Node>>) -> usize {
     let mut sum = 0;
 
     let mut children = current.borrow().children.clone();
-
     let mut queue: VecDeque<Rc<RefCell<Node>>> = VecDeque::new();
 
     for child in children {
@@ -82,6 +143,22 @@ fn count_all_child_to_root_path_lengths(root: Rc<RefCell<Node>>) -> usize {
     }
 
     return sum;
+}
+
+fn search_in_tree(tree: &Rc<RefCell<Node>>, value: &str) -> Option<Rc<RefCell<Node>>> {
+    let mut children = tree.borrow().children.clone();
+
+    for child in children {
+        if &child.borrow().value == value {
+            return Some(child);
+        }
+
+        if let Some(found) = search_in_tree(&child, value) {
+            return Some(found);
+        }
+    }
+
+    return None;
 }
 
 fn traverse_from_child_to_root(child: Rc<RefCell<Node>>) -> usize {
@@ -99,6 +176,7 @@ fn traverse_from_child_to_root(child: Rc<RefCell<Node>>) -> usize {
 
     counter
 }
+
 
 fn create_node(map: &HashMap<&str, Vec<&str>>, name: &str, parent: Option<Weak<RefCell<Node>>>) -> Rc<RefCell<Node>> {
     return if let Some(pointers) = map.get(name) {
@@ -122,7 +200,7 @@ fn create_node(map: &HashMap<&str, Vec<&str>>, name: &str, parent: Option<Weak<R
             parent,
             children: vec![],
         }))
-    }
+    };
 }
 
 
