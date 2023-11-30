@@ -4,6 +4,7 @@ use std::str::FromStr;
 
 pub mod year2019;
 pub mod year2022;
+pub mod utils;
 
 pub trait Day: Default + FromStr + Clone + Sized {
     type Output: Display + Debug;

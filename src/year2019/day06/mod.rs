@@ -1,26 +1,27 @@
 use std::cell::RefCell;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, VecDeque};
 use std::fmt::{Debug, Formatter};
 use std::rc::{Rc, Weak};
 use std::str::FromStr;
 
 use crate::Error;
+use crate::utils::tree::Node;
 
 #[derive(Default, Clone, Debug)]
 pub struct Day {
-    com: Rc<RefCell<Node>>,
+    com: Rc<RefCell<Node<String>>>,
 }
 
-impl Debug for Node {
+impl<T: Clone + Default + Debug> Debug for Node<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let parent_name = if let Some(parent) = &self.parent {
             if let Some(p) = parent.upgrade() {
                 p.borrow().value.clone()
             } else {
-                "Weak Ref not found".to_string()
+                T::default()
             }
         } else {
-            "None".to_string()
+            T::default()
         };
 
         f.debug_struct("Node")
@@ -29,13 +30,6 @@ impl Debug for Node {
             .field("children", &self.children)
             .finish()
     }
-}
-
-#[derive(Default, Clone)]
-pub struct Node {
-    value: String,
-    parent: Option<Weak<RefCell<Node>>>,
-    children: Vec<Rc<RefCell<Node>>>,
 }
 
 impl crate::Day for Day {
@@ -58,11 +52,11 @@ impl crate::Day for Day {
     }
 
     fn solution2(&mut self) -> anyhow::Result<Self::Output> {
-        let start = search_in_tree(&self.com, "YOU");
-        let end = search_in_tree(&self.com, "SAN");
+        let start = self.com.borrow().search_in_tree(&"YOU".to_string());
+        let end = self.com.borrow().search_in_tree(&"SAN".to_string());
 
         if let (Some(start), Some(end)) = (start, end) {
-            let path = breadth_first_search(start, end);
+            let path = Node::advanced_breadth_first_search(start, end);
             return Ok(path.len() - 3)
         }
 
@@ -70,66 +64,13 @@ impl crate::Day for Day {
     }
 }
 
-
-fn breadth_first_search(start: Rc<RefCell<Node>>, end: Rc<RefCell<Node>>) -> Vec<Rc<RefCell<Node>>> {
-    let mut visited = HashMap::new();
-    let mut queue = VecDeque::new();
-    queue.push_back((start.clone(), None));
-
-    while let Some((current, parent)) = queue.pop_front() {
-        if Rc::ptr_eq(&current, &end) {
-            let mut path = vec![current.clone()];
-            let mut previous: Option<Rc<RefCell<Node>>> = parent;
-
-            // backtrace from 'end' node to 'start'
-            while let Some(prev_node) = previous {
-                path.push(prev_node.clone());
-                let s = visited.get(&(Rc::as_ptr(&prev_node)));
-                if let Some(s) = s {
-                    previous = Some(Rc::clone(s));
-                } else {
-                    previous = None;
-                }
-
-                if Rc::ptr_eq(&prev_node, &start) {
-                    break;
-                }
-            }
-
-            path.reverse();
-            return path;
-        }
-
-        if let Some(parent) = parent {
-            visited.insert(Rc::as_ptr(&current), Rc::clone(&parent));
-        }
-
-        let current_borrow = current.borrow();
-
-        if let Some(ref parent_weak) = current_borrow.parent {
-            let parent = parent_weak.upgrade().unwrap();
-            if !visited.contains_key(&Rc::as_ptr(&parent)) {
-                queue.push_back((parent.clone(), Some(Rc::clone(&current))));
-            }
-        }
-
-        for child in &current_borrow.children {
-            if !visited.contains_key(&Rc::as_ptr(child)) {
-                queue.push_back((child.clone(), Some(Rc::clone(&current))));
-            }
-        }
-    }
-
-    Vec::new() // Return empty vector if no path found
-}
-
-fn count_all_child_to_root_path_lengths(root: Rc<RefCell<Node>>) -> usize {
-    let mut current = root;
+fn count_all_child_to_root_path_lengths<T>(root: Rc<RefCell<Node<T>>>) -> usize {
+    let current = root;
 
     let mut sum = 0;
 
-    let mut children = current.borrow().children.clone();
-    let mut queue: VecDeque<Rc<RefCell<Node>>> = VecDeque::new();
+    let children = current.borrow().children.clone();
+    let mut queue: VecDeque<Rc<RefCell<Node<T>>>> = VecDeque::new();
 
     for child in children {
         let direct_and_indirect_orbits = traverse_from_child_to_root(Rc::clone(&child));
@@ -144,24 +85,7 @@ fn count_all_child_to_root_path_lengths(root: Rc<RefCell<Node>>) -> usize {
 
     return sum;
 }
-
-fn search_in_tree(tree: &Rc<RefCell<Node>>, value: &str) -> Option<Rc<RefCell<Node>>> {
-    let mut children = tree.borrow().children.clone();
-
-    for child in children {
-        if &child.borrow().value == value {
-            return Some(child);
-        }
-
-        if let Some(found) = search_in_tree(&child, value) {
-            return Some(found);
-        }
-    }
-
-    return None;
-}
-
-fn traverse_from_child_to_root(child: Rc<RefCell<Node>>) -> usize {
+fn traverse_from_child_to_root<T>(child: Rc<RefCell<Node<T>>>) -> usize {
     let mut counter = 0;
     let mut current_node = Some(child);
 
@@ -178,25 +102,25 @@ fn traverse_from_child_to_root(child: Rc<RefCell<Node>>) -> usize {
 }
 
 
-fn create_node(map: &HashMap<&str, Vec<&str>>, name: &str, parent: Option<Weak<RefCell<Node>>>) -> Rc<RefCell<Node>> {
-    return if let Some(pointers) = map.get(name) {
-        let mut children = vec![];
+fn create_node(map: &HashMap<&str, Vec<&str>>, value: &str, parent: Option<Weak<RefCell<Node<String>>>>) -> Rc<RefCell<Node<String>>> {
+    return if let Some(pointers) = map.get(&value) {
+        let children = vec![];
 
-        let mut child_parent = Rc::new(RefCell::new(Node {
-            value: name.to_string(),
+        let child_parent = Rc::new(RefCell::new(Node {
+            value: value.to_string(),
             parent,
             children,
         }));
 
-        for child_name in pointers {
-            let child = create_node(map, *child_name, Some(Weak::clone(&Rc::downgrade(&child_parent))));
+        for child_value in pointers {
+            let child = create_node(map, *child_value, Some(Weak::clone(&Rc::downgrade(&child_parent))));
             child_parent.borrow_mut().children.push(child);
         }
 
         child_parent
     } else { // end of tree
         Rc::new(RefCell::new(Node {
-            value: name.to_string(),
+            value: value.to_string(),
             parent,
             children: vec![],
         }))
