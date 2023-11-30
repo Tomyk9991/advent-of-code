@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::fmt::{Debug, Formatter};
 use std::rc::{Rc, Weak};
 use std::str::FromStr;
@@ -51,11 +51,9 @@ impl crate::Day for Day {
     }
 
     fn solution1(&mut self) -> anyhow::Result<Self::Output> {
-        println!("{:#?}", self.com);
-
         let counts = count_all_child_to_root_path_lengths(self.com.clone());
 
-        Ok(0)
+        Ok(counts)
     }
 
     fn solution2(&mut self) -> anyhow::Result<Self::Output> {
@@ -67,13 +65,20 @@ fn count_all_child_to_root_path_lengths(root: Rc<RefCell<Node>>) -> usize {
     let mut current = root;
 
     let mut sum = 0;
-    let children = current.borrow().children.clone();
+
+    let mut children = current.borrow().children.clone();
+
+    let mut queue: VecDeque<Rc<RefCell<Node>>> = VecDeque::new();
 
     for child in children {
         let direct_and_indirect_orbits = traverse_from_child_to_root(Rc::clone(&child));
         sum += direct_and_indirect_orbits;
-        println!("{}", direct_and_indirect_orbits);
-        current = Rc::clone(&child);
+
+        queue.push_back(Rc::clone(&child));
+    }
+
+    while let Some(next) = queue.pop_front() {
+        sum += count_all_child_to_root_path_lengths(next);
     }
 
     return sum;
@@ -108,7 +113,6 @@ fn create_node(map: &HashMap<&str, Vec<&str>>, name: &str, parent: Option<Weak<R
         for child_name in pointers {
             let child = create_node(map, *child_name, Some(Weak::clone(&Rc::downgrade(&child_parent))));
             child_parent.borrow_mut().children.push(child);
-            break;
         }
 
         child_parent
