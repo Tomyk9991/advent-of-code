@@ -9,6 +9,7 @@ pub struct Node<T> {
     pub children: Vec<Rc<RefCell<Node<T>>>>,
 }
 
+
 impl<T: Clone + PartialEq> Node<T> {
     /// Breadth first search but it also traverses in parent direction
     pub fn advanced_breadth_first_search(start: Rc<RefCell<Node<T>>>, end: Rc<RefCell<Node<T>>>) -> Vec<Rc<RefCell<Node<T>>>> {
@@ -84,6 +85,6 @@ impl<T: Clone + PartialEq> Node<T> {
             }
         }
 
-        return None;
+        None
     }
 }

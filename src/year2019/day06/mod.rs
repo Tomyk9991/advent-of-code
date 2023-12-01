@@ -83,7 +83,7 @@ fn count_all_child_to_root_path_lengths<T>(root: Rc<RefCell<Node<T>>>) -> usize 
         sum += count_all_child_to_root_path_lengths(next);
     }
 
-    return sum;
+    sum
 }
 fn traverse_from_child_to_root<T>(child: Rc<RefCell<Node<T>>>) -> usize {
     let mut counter = 0;
@@ -113,7 +113,7 @@ fn create_node(map: &HashMap<&str, Vec<&str>>, value: &str, parent: Option<Weak<
         }));
 
         for child_value in pointers {
-            let child = create_node(map, *child_value, Some(Weak::clone(&Rc::downgrade(&child_parent))));
+            let child = create_node(map, child_value, Some(Weak::clone(&Rc::downgrade(&child_parent))));
             child_parent.borrow_mut().children.push(child);
         }
 

@@ -4,6 +4,7 @@ use std::str::FromStr;
 
 pub mod year2019;
 pub mod year2022;
+pub mod year2023;
 pub mod utils;
 
 pub trait Day: Default + FromStr + Clone + Sized {
@@ -69,9 +70,9 @@ impl Display for Error {
 impl std::error::Error for Error { }
 
 fn main() -> anyhow::Result<()> {
-    type CurrentDay = year2019::day06::Day;
+    type CurrentDay = year2023::day01::Day;
 
-    let mut day = CurrentDay::from_str(include_str!("./year2019/day06/input.txt"))?;
+    let mut day = CurrentDay::from_str(include_str!("./year2023/day01/input.txt"))?;
 
     day.test_1()?;
     day.after_test_1();
