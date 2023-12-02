@@ -24,48 +24,26 @@ impl crate::Day for Day {
     fn solution1(&mut self) -> anyhow::Result<Self::Output> {
         let constraint: Color = (12, 13, 14);
 
-        let mut possible_game_indices = vec![];
-        for (index, game) in self.games.iter().enumerate() {
-            let mut fail_count = 0;
-            for set in game {
-                for color in set {
-                    if color.0 > constraint.0 || color.1 > constraint.1 || color.2 > constraint.2 {
-                        fail_count += 1;
-                    }
-                }
-            }
+        let possibles = self.games.iter()
+            .enumerate()
+            .filter(|(_, game)| game.iter().flatten().all(|color| color.0 <= constraint.0 && color.1 <= constraint.1 && color.2 <= constraint.2))
+            .map(|(index, _)| index);
 
-            if fail_count == 0 {
-                possible_game_indices.push(index);
-            }
-        }
-
+        let possible_game_indices: Vec<_> = possibles.collect();
         Ok(possible_game_indices.iter().sum::<usize>() + possible_game_indices.len())
     }
 
     fn solution2(&mut self) -> anyhow::Result<Self::Output> {
-        let mut sum = 0;
-        for game in &self.games {
-            let mut minimum: Color = (usize::MIN, usize::MIN, usize::MIN);
-
-            for set in game {
-                for color in set {
-                    if color.0 > minimum.0 {
-                        minimum.0 = color.0;
-                    }
-
-                    if color.1 > minimum.1 {
-                        minimum.1 = color.1;
-                    }
-
-                    if color.2 > minimum.2 {
-                        minimum.2 = color.2;
-                    }
-                }
-            }
-
-            sum += minimum.0 * minimum.1 * minimum.2;
-        }
+        let sum: usize = self.games.iter()
+            .map(|game| game.iter().flatten()
+                .fold((0usize, 0usize, 0usize), |mut acc, color| {
+                    if color.0 > acc.0 { acc.0 = color.0 }
+                    if color.1 > acc.1 { acc.1 = color.1 }
+                    if color.2 > acc.2 { acc.2 = color.2 }
+                    acc
+                }))
+            .map(|(c0, c1, c2)| c0 * c1 * c2)
+            .sum();
 
         Ok(sum)
     }
