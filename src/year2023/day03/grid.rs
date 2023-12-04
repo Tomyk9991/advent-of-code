@@ -50,7 +50,7 @@ impl Iterator for AsteriskIterator<'_> {
                 self.current_position = (x + 1, y);
 
                 if current_char == '*' {
-                    return Some((x, y))
+                    return Some((x, y));
                 }
             }
 
@@ -81,13 +81,11 @@ impl Iterator for NumberGridIterator<'_> {
 
                     end = Some((x, y));
                     current_number.push(current_char);
-                } else {
-                    if current_number != "" {
-                        return Some(IteratorResult {
-                            value: current_number.parse::<usize>().unwrap_or(0),
-                            position_range: (start.unwrap_or((0, 0)), end.unwrap_or((0, 0))),
-                        });
-                    }
+                } else if !current_number.is_empty() {
+                    return Some(IteratorResult {
+                        value: current_number.parse::<usize>().unwrap_or(0),
+                        position_range: (start.unwrap_or((0, 0)), end.unwrap_or((0, 0))),
+                    });
                 }
             }
 

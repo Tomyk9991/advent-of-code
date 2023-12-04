@@ -36,7 +36,7 @@ impl crate::Day for Day {
             'outer: for y in current_number_in_grid.position_range.0.1..=current_number_in_grid.position_range.1.1 {
                 for x in current_number_in_grid.position_range.0.0..=current_number_in_grid.position_range.1.0 {
 
-                    found_special_character = get_neighbours_predicate(x, y, &self.grid, |c| !c.is_ascii_digit() && c != '.', false).len() > 0;
+                    found_special_character = !get_neighbours_predicate(x, y, &self.grid, |c| !c.is_ascii_digit() && c != '.', false).is_empty();
                     if found_special_character {
                         break 'outer;
                     }
@@ -95,7 +95,7 @@ fn get_neighbours_predicate(x: usize, y: usize, grid: &Grid<char>, predicate: fn
     let mut values = HashSet::new();
     let mut coords_no_number_find = vec![];
     let all_numbers = NumberGridIterator {
-        grid: &grid,
+        grid,
         width: grid.width,
         height: grid.height,
         current_position: (0, 0),
@@ -144,13 +144,12 @@ fn get_neighbours_predicate(x: usize, y: usize, grid: &Grid<char>, predicate: fn
 
     if find_number {
         let mut vec = vec![];
-        for value in values {
-            if let Some(value) = value {
-                vec.push(value.position_range.0)
-            }
+
+        for value in values.into_iter().flatten() {
+            vec.push(value.position_range.0)
         }
 
-        return vec
+        vec
     } else {
         coords_no_number_find
     }
@@ -176,7 +175,7 @@ impl FromStr for Day {
         let grid = Grid::new(
             s.lines().collect::<Vec<_>>()[0].len(),
             s.lines().count(),
-            s.lines().map(|line| line.chars()).flatten().collect(),
+            s.lines().flat_map(|line| line.chars()).collect(),
         );
         Ok(Self {
             grid
