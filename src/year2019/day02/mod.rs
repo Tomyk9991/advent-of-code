@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use crate::Error;
+use crate::aoc::Error;
 
 #[derive(Default, Clone)]
 pub struct Day {
@@ -8,7 +8,7 @@ pub struct Day {
     pub parameter: Option<(usize, usize)>
 }
 
-impl crate::Day for Day {
+impl crate::aoc::Day for Day {
     type Output = i32;
 
     fn test_cases_1() -> Vec<(&'static str, Self::Output)> {

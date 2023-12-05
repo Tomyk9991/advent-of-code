@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use std::str::FromStr;
 
-use crate::Error;
+use crate::aoc::Error;
 use crate::year2023::day03::grid::{AsteriskIterator, Coord, Grid, IteratorResult, NumberGridIterator};
 
 mod grid;
@@ -11,7 +11,7 @@ pub struct Day {
     grid: Grid<char>,
 }
 
-impl crate::Day for Day {
+impl crate::aoc::Day for Day {
     type Output = usize;
 
     fn test_cases_1() -> Vec<(&'static str, Self::Output)> {

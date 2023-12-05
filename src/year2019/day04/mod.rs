@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 use std::str::FromStr;
-use crate::Error;
+use crate::aoc::Error;
 
 #[derive(Default, Clone)]
 pub struct Day {
@@ -19,7 +19,7 @@ fn to_digits(n: u32) -> [u8; 6] {
     digits
 }
 
-impl crate::Day for Day {
+impl crate::aoc::Day for Day {
     type Output = u32;
 
     fn test_cases_1() -> Vec<(&'static str, Self::Output)> {

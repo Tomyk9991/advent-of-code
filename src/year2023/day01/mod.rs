@@ -1,13 +1,13 @@
 use std::str::FromStr;
 
-use crate::Error;
+use crate::aoc::Error;
 
 #[derive(Default, Clone)]
 pub struct Day {
     lines: Vec<Vec<char>>,
 }
 
-impl crate::Day for Day {
+impl crate::aoc::Day for Day {
     type Output = u32;
 
     fn test_cases_1() -> Vec<(&'static str, Self::Output)> {

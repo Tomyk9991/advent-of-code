@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use crate::Error;
+use crate::aoc::Error;
 
 // R G B = RED GREEN BLUE
 type Color = (usize, usize, usize);
@@ -10,7 +10,7 @@ pub struct Day {
     games: Vec<Vec<Vec<Color>>>
 }
 
-impl crate::Day for Day {
+impl crate::aoc::Day for Day {
     type Output = usize;
 
     fn test_cases_1() -> Vec<(&'static str, Self::Output)> {

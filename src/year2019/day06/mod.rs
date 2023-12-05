@@ -4,7 +4,7 @@ use std::fmt::{Debug, Formatter};
 use std::rc::{Rc, Weak};
 use std::str::FromStr;
 
-use crate::Error;
+use crate::aoc::Error;
 use crate::utils::tree::Node;
 
 #[derive(Default, Clone, Debug)]
@@ -32,7 +32,7 @@ impl<T: Clone + Default + Debug> Debug for Node<T> {
     }
 }
 
-impl crate::Day for Day {
+impl crate::aoc::Day for Day {
     type Output = usize;
 
     fn test_cases_1() -> Vec<(&'static str, Self::Output)> {

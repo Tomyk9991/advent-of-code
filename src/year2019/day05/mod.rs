@@ -1,5 +1,5 @@
 use std::str::FromStr;
-use crate::Error;
+use crate::aoc::Error;
 use crate::year2019::day05::int_code_computer::{IntCodeComputer, IO};
 
 mod int_code_computer;
@@ -10,7 +10,7 @@ pub struct Day {
     pub parameter: Option<(i32, i32)>
 }
 
-impl crate::Day for Day {
+impl crate::aoc::Day for Day {
     type Output = i32;
 
     fn test_cases_1() -> Vec<(&'static str, Self::Output)> {
