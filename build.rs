@@ -4,7 +4,7 @@ fn main() {
     let day_folder = "./src/year2023/";
 
     let num_days = fs::read_dir(day_folder)
-        .expect(&format!("Unable to read directory {day_folder}"))
+        .unwrap_or_else(|_| panic!("Unable to read directory {day_folder}"))
         .filter_map(|entry| entry.ok())
         .filter(|entry| entry.file_type().map(|ft| ft.is_dir()).unwrap_or(false))
         .count();
@@ -35,7 +35,7 @@ fn main() -> anyhow::Result<()> {{
     Ok(())
 }}"#);
 
-    let main_rs_path = format!("./src/main.rs");
+    let main_rs_path = "./src/main.rs".to_string();
     let mod_rs_path = format!("{day_folder}mod.rs");
 
     let mut mod_rs: String = String::new();
@@ -45,8 +45,8 @@ fn main() -> anyhow::Result<()> {{
     }
 
 
-    fs::write(&mod_rs_path, mod_rs).expect("Unable to write to year2023/mod.rs");
-    fs::write(&main_rs_path, main_rs).expect("Unable to write to main.rs");
+    fs::write(mod_rs_path, mod_rs).expect("Unable to write to year2023/mod.rs");
+    fs::write(main_rs_path, main_rs).expect("Unable to write to main.rs");
 
     println!("cargo:rerun-if-changed=./src/year2023");
     println!("cargo:rerun-if-changed=build.rs");

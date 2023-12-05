@@ -1,11 +1,7 @@
-use std::collections::HashMap;
 use std::ops::Range;
 use std::str::FromStr;
-use std::sync::{Arc, Mutex};
-use std::thread;
-use std::time::Instant;
-use crate::aoc::Error;
 
+use crate::aoc::Error;
 
 #[derive(Default, Clone, Debug)]
 pub struct Relation {
@@ -15,13 +11,12 @@ pub struct Relation {
 
 #[derive(Clone, Debug, Default)]
 struct FromToRelations {
-    relations: Vec<Relation>
+    relations: Vec<Relation>,
 }
 
 impl FromToRelations {
     fn mapping(&self, target: u64) -> u64 {
         for relation in &self.relations {
-
             let mut source = relation.source_range.clone();
             source.end += 1;
 
@@ -37,14 +32,14 @@ impl FromToRelations {
             }
         }
 
-        return target
+        target
     }
 }
 
 #[derive(Debug, Default, Clone)]
 pub struct Day {
     seeds: Vec<u64>,
-    from_to_relations: Vec<FromToRelations>
+    from_to_relations: Vec<FromToRelations>,
 }
 
 impl crate::aoc::Day for Day {
@@ -74,65 +69,62 @@ impl crate::aoc::Day for Day {
     }
 
     fn solution2(&mut self) -> anyhow::Result<Self::Output> {
-        let mut seed_ranges = self.seeds.chunks(2).map(|chunk| {
+        let mut seeds = self.seeds.chunks(2).map(|chunk| {
             chunk[0]..(chunk[0] + chunk[1])
         }).collect::<Vec<_>>();
 
-        let start = Instant::now();
+        // overall algorithm. for each map seed-to-soil, soil-to-fertilizer etc.
+        // check if there is an overlap with one of the seed ranges.
+        // if there is an overlap check for cases, in where the overlap is completly in the map area
+        // if so, look at this inner section again
+        // if not the outer part considered mapped
+        for from_to_relation in &self.from_to_relations {
+            let mut new = vec![];
 
-        for _ in 0..4 {
-            seed_ranges = split_ranges(seed_ranges);
-        }
+            while let Some(current_seed_range) = seeds.pop() {
+                let mut broken = false;
 
-        let mut thread_handles = vec![];
-        let from_to_relations_clone = self.from_to_relations.clone();
+                // check the overlap for each relation
+                for relation in &from_to_relation.relations {
+                    let destination_start = relation.destination_range.start;
 
-        for seed_range in seed_ranges {
-            let from_to_relations_clone = from_to_relations_clone.clone();
-            let handle = thread::spawn(move || {
-                let mut min = u64::MAX;
-                for seed in seed_range {
-                    let final_seed = from_location_to_location(&from_to_relations_clone, seed, 0, from_to_relations_clone.len());
-                    if final_seed < min {
-                        min = final_seed;
+                    let source_start = relation.source_range.start;
+                    let source_end = relation.source_range.end;
+
+                    // calculate the overlaps
+                    // overlap start and overlap end
+                    let os = current_seed_range.start.max(source_start);
+                    let oe = current_seed_range.end.min(source_end);
+
+                    if os < oe { // if it overlaps
+                        new.push(os - source_start + destination_start..oe - source_start + destination_start);
+
+
+                        // handle cases, if the overlap is completely in the map-range
+                        if os > current_seed_range.start {
+                            seeds.push(current_seed_range.start..os)
+                        }
+
+                        if current_seed_range.end > oe {
+                            seeds.push(oe..current_seed_range.end);
+                        }
+
+                        broken = true;
+                        break;
                     }
                 }
-                min
-            });
 
-            thread_handles.push(handle);
-        }
-
-        let mut min_results = vec![];
-        for handle in thread_handles {
-            if let Ok(min_result) = handle.join() {
-                min_results.push(min_result);
+                if !broken {
+                    new.push(current_seed_range)
+                }
             }
+
+            seeds = new;
         }
 
-        let duration = start.elapsed();
-        if duration.as_secs() != 0 {
-            println!("Time elapsed in solution 2: {:?}", duration.as_secs());
-        }
-
-        if let Some(min) = min_results.iter().min() {
-            Ok(*min)
-        } else {
-            Ok(0)
-        }
+        seeds.sort_by(|a, b| a.start.cmp(&b.start));
+        Ok(seeds[0].start)
     }
-}
-
-pub fn split_ranges(orig_ranges: Vec<std::ops::Range<u64>>) -> Vec<std::ops::Range<u64>> {
-    let mut new_ranges: Vec<std::ops::Range<u64>> = Vec::new();
-
-    for range in orig_ranges {
-        let midpoint = (range.start + range.end) / 2;
-        new_ranges.push(range.start..midpoint);
-        new_ranges.push(midpoint..range.end);
-    }
-
-    new_ranges
 }
 
 fn from_location_to_location(from_to_relations: &[FromToRelations], seed: u64, level: usize, max_level: usize) -> u64 {
@@ -141,7 +133,7 @@ fn from_location_to_location(from_to_relations: &[FromToRelations], seed: u64, l
     }
 
     let new_seed = from_to_relations[level].mapping(seed);
-    return from_location_to_location(from_to_relations, new_seed, level + 1, max_level);
+    from_location_to_location(from_to_relations, new_seed, level + 1, max_level)
 }
 
 impl FromStr for Day {
@@ -194,7 +186,6 @@ impl FromStr for Day {
 
         if !current_relation.relations.is_empty() { // new relation
             relations.push(current_relation);
-            current_relation = FromToRelations { relations: vec![] };
         }
 
         Ok(Self {
