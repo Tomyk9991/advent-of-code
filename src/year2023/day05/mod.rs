@@ -99,7 +99,6 @@ impl crate::aoc::Day for Day {
                     if os < oe { // if it overlaps
                         new.push(os - source_start + destination_start..oe - source_start + destination_start);
 
-
                         // handle cases, if the overlap is completely in the map-range
                         if os > current_seed_range.start {
                             seeds.push(current_seed_range.start..os)
