@@ -16,7 +16,7 @@ enum Type {
     A = 14,
     K = 13,
     Q = 12,
-    /// to get the correct anwser for problem two, replace J = 11, with J = 1
+    /// to get the correct answer for problem two, replace J = 11, with J = 1
     J = 11,
     Ten = 10,
     Nine = 9,
