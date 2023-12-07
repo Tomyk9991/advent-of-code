@@ -29,15 +29,15 @@ enum Type {
     Two = 2,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq)]
 enum HandStrength {
-    HighCard,
-    OnePair,
-    TwoPair,
-    ThreeOfAKind,
-    FullHouse,
-    FourOfAKind,
-    FiveOfAKind,
+    HighCard = 1,
+    OnePair = 2,
+    TwoPair = 3,
+    ThreeOfAKind = 4,
+    FullHouse = 5,
+    FourOfAKind = 6,
+    FiveOfAKind = 7,
 }
 
 #[derive(Debug, Clone)]
@@ -49,7 +49,6 @@ struct Hand {
 
 trait AreEqual {
     fn are_equal(&self, amount: usize) -> bool;
-    fn are_equal_typed(&self, amount: usize) -> (bool, Type);
     fn are_equal_distinct(&self, amount: usize, distinct_from: &[Type]) -> (bool, Type);
 }
 
@@ -65,17 +64,13 @@ impl Hand {
             .filter_map(|(i, s)| if *s == Type::J { Some(i) } else { None })
             .collect::<Vec<_>>();
 
-        let alle_joker_combinations = HandPermutationIterator::new(virtual_hand.clone(), js);
-        let mut maximal_hand_strength = HandStrength::HighCard;
+        let max_hand = HandPermutationIterator::new(virtual_hand.clone(), js)
+            .map(|m| HandStrength::from(&m.values))
+            .max()
+            .unwrap_or(self.hand_strength.clone());
 
-        for permutation in alle_joker_combinations {
-            let strength = HandStrength::from(&permutation.values);
-            if strength > maximal_hand_strength {
-                maximal_hand_strength = strength.clone();
-            }
-        }
 
-        self.hand_strength = maximal_hand_strength;
+        self.hand_strength = max_hand;
     }
 }
 
@@ -111,7 +106,10 @@ impl HandPermutationIterator {
             replacements.push(types.clone());
         }
 
-        let permutations = replacements.iter().cloned().multi_cartesian_product().collect::<VecDeque<_>>();
+        let permutations = replacements.iter()
+            .cloned()
+            .multi_cartesian_product()
+            .collect::<VecDeque<_>>();
 
         Self {
             hand,
@@ -140,27 +138,7 @@ impl Iterator for HandPermutationIterator {
 
 impl AreEqual for &Vec<Type> {
     fn are_equal(&self, amount: usize) -> bool {
-        self.are_equal_typed(amount).0
-    }
-
-    fn are_equal_typed(&self, amount: usize) -> (bool, Type) {
-        let mut hash_map: HashMap<Type, usize> = HashMap::new();
-
-        for ty in self.iter() {
-            if let Some(value) = hash_map.get_mut(ty) {
-                *value += 1;
-            } else {
-                hash_map.insert(ty.clone(), 1);
-            }
-        }
-
-        for (ty, value) in &hash_map {
-            if *value == amount {
-                return (true, ty.clone());
-            }
-        }
-
-        (false, Type::Two)
+        self.are_equal_distinct(amount, &[]).0
     }
 
     fn are_equal_distinct(&self, amount: usize, distinct_from: &[Type]) -> (bool, Type) {
@@ -202,7 +180,7 @@ impl From<&Vec<Type>> for HandStrength {
             return HandStrength::ThreeOfAKind;
         }
 
-        let is_two_pair = value.are_equal_typed(2);
+        let is_two_pair = value.are_equal_distinct(2, &[]);
 
         if is_two_pair.0 {
             let is_two_pair_second = value.are_equal_distinct(2, &[is_two_pair.1.clone()]);
@@ -215,20 +193,6 @@ impl From<&Vec<Type>> for HandStrength {
         }
 
         HandStrength::HighCard
-    }
-}
-
-impl From<HandStrength> for u8 {
-    fn from(value: HandStrength) -> Self {
-        match value {
-            HandStrength::HighCard => 1,
-            HandStrength::OnePair => 2,
-            HandStrength::TwoPair => 3,
-            HandStrength::ThreeOfAKind => 4,
-            HandStrength::FullHouse => 5,
-            HandStrength::FourOfAKind => 6,
-            HandStrength::FiveOfAKind => 7
-        }
     }
 }
 
@@ -253,40 +217,6 @@ impl From<char> for Type {
     }
 }
 
-impl Eq for HandStrength {}
-
-impl PartialEq<Self> for HandStrength {
-    fn eq(&self, other: &Self) -> bool {
-        let value: u8 = (*self).clone().into();
-        let other: u8 = (*other).clone().into();
-
-        value.eq(&other)
-    }
-}
-
-impl PartialOrd<Self> for HandStrength {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        let value: u8 = (*self).clone().into();
-        let other: u8 = (*other).clone().into();
-
-        value.partial_cmp(&other)
-    }
-}
-
-impl Ord for HandStrength {
-    fn cmp(&self, other: &Self) -> Ordering {
-        let value: u8 = (*self).clone().into();
-        let other: u8 = (*other).clone().into();
-
-        value.cmp(&other)
-    }
-}
-
-impl From<Type> for u8 {
-    fn from(value: Type) -> Self {
-        value as u8
-    }
-}
 
 impl Eq for Hand {}
 
@@ -317,19 +247,11 @@ impl PartialOrd<Self> for Hand {
 
 impl Ord for Hand {
     fn cmp(&self, other: &Self) -> Ordering {
-        let cmp = self.hand_strength.cmp(&other.hand_strength);
-
-        if cmp == Ordering::Equal {
-            for (ty1, ty2) in self.values.iter().zip(&other.values) {
-                let type_cmp = ty1.cmp(ty2);
-
-                if type_cmp == Ordering::Equal {
-                    continue;
-                }
-            }
+        if let Some(ord) = self.hand_strength.partial_cmp(&other.hand_strength) {
+            return ord;
+        } else {
+            Ordering::Equal
         }
-
-        cmp
     }
 }
 
