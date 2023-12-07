@@ -59,6 +59,11 @@ impl Hand {
     pub fn rebuild(&mut self) {
         let virtual_hand = self.clone();
 
+        if virtual_hand.values.iter().all(|t| *t == Type::J) {
+            self.hand_strength = HandStrength::FiveOfAKind;
+            return;
+        }
+
         let js = virtual_hand.values.iter()
             .enumerate()
             .filter_map(|(i, s)| if *s == Type::J { Some(i) } else { None })

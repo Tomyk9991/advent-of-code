@@ -1,4 +1,5 @@
 use std::str::FromStr;
+use std::time::Instant;
 use crate::aoc::Day;
 
 pub mod year2019;
@@ -14,11 +15,13 @@ fn main() -> anyhow::Result<()> {
 
     day.test_1()?;
     day.after_test_1();
-    println!("Solution 1: {}", day.solution1()?);
+    let time = Instant::now();
+    println!("Solution 1: {:<20} took ~{}ms", day.solution1()?, (Instant::now() - time).as_millis());
 
     day.test_2()?;
     day.after_test_2();
-    println!("Solution 2: {}", day.solution2()?);
+    let time = Instant::now();
+    println!("Solution 2: {:<20} took ~{}ms", day.solution2()?, (Instant::now() - time).as_millis());
 
     Ok(())
 }
