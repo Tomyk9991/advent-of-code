@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::collections::{HashMap, VecDeque};
-use std::fmt::{Debug, Formatter};
+use std::fmt::{Debug};
 use std::rc::{Rc, Weak};
 use std::str::FromStr;
 
@@ -10,26 +10,6 @@ use crate::utils::tree::Node;
 #[derive(Default, Clone, Debug)]
 pub struct Day {
     com: Rc<RefCell<Node<String>>>,
-}
-
-impl<T: Clone + Default + Debug> Debug for Node<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let parent_name = if let Some(parent) = &self.parent {
-            if let Some(p) = parent.upgrade() {
-                p.borrow().value.clone()
-            } else {
-                T::default()
-            }
-        } else {
-            T::default()
-        };
-
-        f.debug_struct("Node")
-            .field("value", &self.value)
-            .field("parent", &parent_name)
-            .field("children", &self.children)
-            .finish()
-    }
 }
 
 impl crate::aoc::Day for Day {
@@ -52,8 +32,8 @@ impl crate::aoc::Day for Day {
     }
 
     fn solution2(&mut self) -> anyhow::Result<Self::Output> {
-        let start = self.com.borrow().search_in_tree(&"YOU".to_string());
-        let end = self.com.borrow().search_in_tree(&"SAN".to_string());
+        let start = self.com.borrow().search_in_tree_predicate(|a| a == "YOU");
+        let end = self.com.borrow().search_in_tree_predicate(|a| a == "SAN");
 
         if let (Some(start), Some(end)) = (start, end) {
             let path = Node::advanced_breadth_first_search(start, end);
