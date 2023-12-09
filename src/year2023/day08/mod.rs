@@ -82,7 +82,7 @@ impl crate::aoc::Day for Day {
 
                 counters[current_index].counter += 1;
 
-                if current.borrow().value.ends_with("Z") {
+                if current.borrow().value.ends_with('Z') {
                     counters[current_index].is_finished = true;
                 }
             }
@@ -151,7 +151,7 @@ impl FromStr for Day {
                 .collect::<Vec<_>>();
 
             let node_name = node_names[0].to_string();
-            let temp = node_names[1].split(", ").map(|a| a.replace('(', "").replace(')', "")).collect::<Vec<_>>();
+            let temp = node_names[1].split(", ").map(|a| a.replace(['(', ')'], "")).collect::<Vec<_>>();
 
             let childs: [String; 2] = [temp[0].to_string(), temp[1].to_string()];
 
@@ -169,6 +169,7 @@ impl FromStr for Day {
 }
 
 impl Day {
+    #[allow(clippy::type_complexity)]
     fn from_str_modified(s: &str) -> (Vec<Rc<RefCell<Node<String>>>>, Vec<Instruction>) {
         let mut iter = s.lines();
         let lri = iter.next().unwrap_or("");
@@ -195,7 +196,7 @@ impl Day {
                 .collect::<Vec<_>>();
 
             let node_name = node_names[0].to_string();
-            let temp = node_names[1].split(", ").map(|a| a.replace('(', "").replace(')', "")).collect::<Vec<_>>();
+            let temp = node_names[1].split(", ").map(|a| a.replace(['(', ')'], "")).collect::<Vec<_>>();
 
             let childs: [String; 2] = [temp[0].to_string(), temp[1].to_string()];
 
@@ -205,13 +206,13 @@ impl Day {
         let mut c = vec![];
 
         for key in hash_map.keys() {
-            if key.ends_with("A") {
+            if key.ends_with('A') {
                 let root = create_node(&hash_map, key, None, &mut HashMap::new());
                 c.push(root);
             }
         }
 
-        return (c, instructions)
+        (c, instructions)
     }
 }
 

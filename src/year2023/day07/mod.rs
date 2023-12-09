@@ -253,7 +253,7 @@ impl PartialOrd<Self> for Hand {
 impl Ord for Hand {
     fn cmp(&self, other: &Self) -> Ordering {
         if let Some(ord) = self.hand_strength.partial_cmp(&other.hand_strength) {
-            return ord;
+            ord
         } else {
             Ordering::Equal
         }

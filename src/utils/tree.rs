@@ -135,14 +135,14 @@ pub fn search_in_tree_predicate_all<T: Display + Hash + Debug + Eq + PartialEq +
     let mut a = vec![];
 
     search_in_tree_accumulated_all(own, predicate, &mut HashSet::new(), &mut a);
-    return a;
+    a
 }
 
 fn search_in_tree_accumulated_all<T: Display + Hash + Debug + Eq + PartialEq + Clone>(own: &Rc<RefCell<Node<T>>>, predicate: fn(&T) -> bool, hashset: &mut HashSet<T>, found_nodes: &mut Vec<Rc<RefCell<Node<T>>>>) {
     let children = own.borrow().children.clone();
 
     if predicate(&own.borrow().value) {
-        found_nodes.push(Rc::clone(&own));
+        found_nodes.push(Rc::clone(own));
     }
 
     for child in children {
