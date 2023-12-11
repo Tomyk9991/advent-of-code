@@ -1,14 +1,15 @@
-use std::collections::HashSet;
+use std::fmt::Debug;
 use std::str::FromStr;
 use itertools::Itertools;
-
 use crate::aoc::Error;
-use crate::utils::grid::Grid;
+use crate::utils::grid::{CharIterator, Coord, Distance, Grid};
 
 
 #[derive(Debug, Clone, Default)]
 pub struct Day {
-    grid: Grid<char>,
+    galaxy_positions: Vec<Coord>,
+    empty_rows: Vec<usize>,
+    empty_columns: Vec<usize>
 }
 
 impl crate::aoc::Day for Day {
@@ -19,25 +20,58 @@ impl crate::aoc::Day for Day {
     }
 
     fn test_cases_2() -> Vec<(&'static str, Self::Output)> {
-        todo!()
+        // vec![("...#......\n.......#..\n#.........\n..........\n......#...\n.#........\n.........#\n..........\n.......#..\n#...#.....", 82000210)]
+        vec![]
     }
 
     fn solution1(&mut self) -> anyhow::Result<Self::Output> {
-        todo!()
+        let expansion = 1;
+        let mut galaxy_positions = self.galaxy_positions.clone();
+
+        for galaxy_position in galaxy_positions.iter_mut() {
+            galaxy_position.0 += expansion * (self.empty_columns.iter().filter(|column| galaxy_position.0 > **column).count());
+            galaxy_position.1 += expansion * (self.empty_rows.iter().filter(|row| galaxy_position.1 > **row).count());
+        }
+
+        let pairs = galaxy_positions.into_iter().combinations(2).collect::<Vec<_>>();
+        let mut sum = 0;
+
+        for pairs in &pairs {
+            if let [p1, p2] = pairs[..] {
+                sum += p1.manhattan_distance(&p2);
+            }
+        }
+
+        Ok(sum)
     }
 
     fn solution2(&mut self) -> anyhow::Result<Self::Output> {
-        todo!()
+        let expansion = 1000000 - 1;
+        let mut galaxy_positions = self.galaxy_positions.clone();
+
+        for galaxy_position in galaxy_positions.iter_mut() {
+            galaxy_position.0 += expansion * self.empty_columns.iter().filter(|column| galaxy_position.0 > **column).count();
+            galaxy_position.1 += expansion * self.empty_rows.iter().filter(|row| galaxy_position.1 > **row).count();
+        }
+
+        let pairs = galaxy_positions.into_iter().combinations(2).collect::<Vec<_>>();
+        let mut sum = 0;
+
+        for pairs in &pairs {
+            if let [p1, p2] = pairs[..] {
+                sum += p1.manhattan_distance(&p2);
+            }
+        }
+
+        Ok(sum)
     }
 }
 
 trait Empty {
     fn row(&self) -> Vec<usize>;
     fn column(&self) -> Vec<usize>;
-
-    fn expand_row(&mut self, row: usize);
-    fn expand_column(&mut self, column: usize);
 }
+
 
 impl Empty for Grid<char> {
     fn row(&self) -> Vec<usize> {
@@ -57,7 +91,7 @@ impl Empty for Grid<char> {
             }
         }
 
-        return rows;
+        rows
     }
 
     fn column(&self) -> Vec<usize> {
@@ -77,15 +111,7 @@ impl Empty for Grid<char> {
             }
         }
 
-        return columns;
-    }
-
-    fn expand_row(&mut self, row: usize) {
-        todo!()
-    }
-
-    fn expand_column(&mut self, column: usize) {
-        todo!()
+        columns
     }
 }
 
@@ -104,21 +130,22 @@ impl FromStr for Day {
             0
         };
 
-        println!("width: {} height: {} data: {}", width, height, data.len());
+        let grid: Grid<char> = Grid::new(width, height, data);
 
-        let mut grid: Grid<char> = Grid::new(width, height, data);
         let empty_rows = grid.row();
         let empty_columns = grid.column();
 
+        let points = CharIterator {
+            grid: &grid,
+            current_position: (0, 0),
+            target: '#',
+        }.collect::<Vec<_>>();
 
-        println!("{:?}", empty_rows);
-        println!("{:?}", empty_columns);
 
-        // empty_rows.iter().for_each(|row| grid.expand_row(*row));
-        // empty_columns.iter().for_each(|column| grid.expand_column(*column));
-
-        return Ok(Self {
-            grid
+        Ok(Self {
+            galaxy_positions: points,
+            empty_rows,
+            empty_columns,
         })
     }
 }

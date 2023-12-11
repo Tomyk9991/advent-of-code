@@ -1,10 +1,37 @@
-use std::ops::Index;
+use std::fmt::{Debug, Formatter};
+use std::ops::{Index, IndexMut};
 
-#[derive(Debug, Default, Clone)]
+#[derive(Default, Clone)]
 pub struct Grid<T> {
     pub width: usize,
     pub height: usize,
-    data: Vec<T>,
+    pub data: Vec<T>,
+}
+
+pub trait Distance {
+    fn euclidean_distance(&self, other: &Self) -> f32;
+    fn manhattan_distance(&self, other: &Self) -> usize;
+}
+
+impl Distance for Coord {
+    fn euclidean_distance(&self, other: &Self) -> f32 {
+        (((other.0 - self.0).pow(2) + (other.1 - self.1).pow(2)) as f32).sqrt()
+    }
+
+    fn manhattan_distance(&self, other: &Self) -> usize {
+        (self.0.abs_diff(other.0)) + (self.1.abs_diff(other.1))
+    }
+}
+
+impl Debug for Grid<char> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if self.data.is_empty() {
+            write!(f, "")
+        } else {
+            let s = self.data.chunks(self.width).map(|a| a.iter().collect::<String>()).collect::<Vec<_>>();
+            write!(f, "{}", s.join("\n"))
+        }
+    }
 }
 
 impl<T> Grid<T> {
@@ -29,6 +56,12 @@ impl<T> Index<(usize, usize)> for Grid<T> {
     }
 }
 
+impl<T> IndexMut<(usize, usize)> for Grid<T> {
+    fn index_mut(&mut self, (x, y): (usize, usize)) -> &mut Self::Output {
+        &mut self.data[y * self.width + x]
+    }
+}
+
 pub type Coord = (usize, usize);
 
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]
@@ -47,23 +80,22 @@ pub struct NumberGridIterator<'a> {
     pub height: usize,
 }
 
-pub struct AsteriskIterator<'a> {
+pub struct CharIterator<'a> {
     pub grid: &'a Grid<char>,
     pub current_position: Coord,
-    pub width: usize,
-    pub height: usize,
+    pub target: char,
 }
 
-impl Iterator for AsteriskIterator<'_> {
+impl Iterator for CharIterator<'_> {
     type Item = Coord;
 
     fn next(&mut self) -> Option<Self::Item> {
-        for y in self.current_position.1..self.height {
-            for x in self.current_position.0..self.width {
+        for y in self.current_position.1..self.grid.height {
+            for x in self.current_position.0..self.grid.width {
                 let current_char = self.grid[(x, y)];
                 self.current_position = (x + 1, y);
 
-                if current_char == '*' {
+                if current_char == self.target {
                     return Some((x, y));
                 }
             }
