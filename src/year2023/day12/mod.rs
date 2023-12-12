@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::str::FromStr;
-use itertools::Itertools;
 
 use crate::aoc::Error;
 
@@ -18,11 +17,11 @@ pub struct Day {
 
 fn count_combinations<'a>(config: &'a str, numbers: &'a [usize], cache: &mut HashMap<(&'a str, &'a [usize]), usize>) -> usize {
     if config.is_empty() {
-        return if numbers.len() == 0 { 1 } else { 0 }
+        return if numbers.is_empty() { 1 } else { 0 };
     }
 
     if numbers.is_empty() {
-        return if config.contains('#') { 0 } else { 1 }
+        return if config.contains('#') { 0 } else { 1 };
     }
 
     let key = (config, numbers);
@@ -33,26 +32,24 @@ fn count_combinations<'a>(config: &'a str, numbers: &'a [usize], cache: &mut Has
 
     let mut result = 0;
 
-    if let Some(first) = config.chars().nth(0) {
+    if let Some(first) = config.chars().next() {
         if ".?".contains(first) {
             result += count_combinations(&config[1..], numbers, cache);
         }
 
-        if "#?".contains(first) {
-            if numbers[0] <= config.chars().count() && !config[..numbers[0]].contains('.') && (numbers[0] == config.len() || config.chars().nth(numbers[0]).unwrap() != '#') {
-                let s = if numbers[0] + 1 >= config.len() {
-                    ""
-                } else {
-                    &config[numbers[0] + 1..]
-                };
-                result += count_combinations(s, &numbers[1..], cache);
-            }
+        if "#?".contains(first) && numbers[0] <= config.chars().count() && !config[..numbers[0]].contains('.') && (numbers[0] == config.len() || config.chars().nth(numbers[0]).unwrap() != '#') {
+            let s = if numbers[0] + 1 >= config.len() {
+                ""
+            } else {
+                &config[numbers[0] + 1..]
+            };
+            result += count_combinations(s, &numbers[1..], cache);
         }
     }
 
 
     cache.insert(key, result);
-    return result;
+    result
 }
 
 fn repeat_and_separate(s: &str, count: usize, separator: &str) -> String {
