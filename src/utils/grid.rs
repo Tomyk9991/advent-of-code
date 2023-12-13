@@ -34,6 +34,24 @@ impl Debug for Grid<char> {
     }
 }
 
+impl<T: Clone> Grid<T> {
+    pub fn transpose(&self) -> Grid<T> {
+        let mut transposed_data = Vec::with_capacity(self.data.len());
+
+        for col in 0..self.width {
+            for row in 0..self.height {
+                transposed_data.push(self.data[row * self.width + col].clone());
+            }
+        }
+
+        Grid {
+            width: self.height,
+            height: self.width,
+            data: transposed_data,
+        }
+    }
+}
+
 impl<T> Grid<T> {
     pub fn find(&self, predicate: fn(&T) -> bool) -> Option<(usize, usize)> {
         let index = self.data.iter()
