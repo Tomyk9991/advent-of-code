@@ -8,6 +8,11 @@ pub struct Grid<T> {
     pub data: Vec<T>,
 }
 
+pub enum Dimension {
+    X,
+    Y
+}
+
 pub trait Distance {
     fn euclidean_distance(&self, other: &Self) -> f32;
     fn manhattan_distance(&self, other: &Self) -> usize;
@@ -52,7 +57,21 @@ impl<T: Clone> Grid<T> {
     }
 }
 
-impl<T> Grid<T> {
+impl<T: Clone> Grid<T> {
+    pub fn to_2d(&self) -> Vec<Vec<T>> {
+        let mut result = Vec::with_capacity(self.height);
+
+        for y in 0..self.height {
+            let start_index = y * self.width;
+            let end_index = start_index + self.width;
+
+            let row = self.data[start_index..end_index].to_vec();
+            result.push(row);
+        }
+
+        result
+    }
+
     pub fn find(&self, predicate: fn(&T) -> bool) -> Option<(usize, usize)> {
         let index = self.data.iter()
             .enumerate()
@@ -65,6 +84,7 @@ impl<T> Grid<T> {
         None
     }
 }
+
 
 impl<T> Index<(usize, usize)> for Grid<T> {
     type Output = T;

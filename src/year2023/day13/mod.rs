@@ -3,10 +3,11 @@ use std::str::FromStr;
 use itertools::Itertools;
 
 use crate::aoc::Error;
+use crate::utils::grid::Grid;
 
 #[derive(Debug, Clone, Default)]
 pub struct Day {
-    grids: Vec<Vec<Vec<char>>>,
+    grids: Vec<Grid<char>>,
 }
 
 impl crate::aoc::Day for Day {
@@ -44,21 +45,21 @@ impl crate::aoc::Day for Day {
 
             let before = grid.find_all_reflections(0, 0, false);
 
-            'outer: for y in 0..grid.len() {
-                for x in 0..grid[0].len() {
-                    let original = grid[y][x];
+            'outer: for y in 0..grid.height {
+                for x in 0..grid.width {
+                    let original = grid[(x, y)];
                     let mut index = None;
 
                     match original {
-                        '#' => { grid[y][x] = '.'; index = Some((y, x)); }
-                        '.' => { grid[y][x] = '#'; index = Some((y, x)); }
+                        '#' => { grid[(x, y)] = '.'; index = Some((x, y)); }
+                        '.' => { grid[(x, y)] = '#'; index = Some((x, y)); }
                         _ => { }
                     }
 
                     let after = grid.find_all_reflections(y, x, true);
 
                     if let Some(index) = index {
-                        grid[index.0][index.1] = original;
+                        grid[index] = original;
                     }
 
                     if let Some(new) = after.clone().into_iter().collect_vec().into_iter().find(|x| !before.contains(x)) {
@@ -82,36 +83,29 @@ enum Orientation {
     Vertical(usize),
 }
 
-pub fn transpose<T: Default + Clone>(s: &Vec<Vec<T>>) -> Vec<Vec<T>> {
-    let mut result = vec![vec![T::default(); s.len()]; s[0].len()];
-
-    for (i, row) in s.iter().cloned().enumerate() {
-        for (j, x) in row.iter().cloned().enumerate() {
-            result[j][i] = x;
-        }
-    }
-    result
-}
-
 
 trait IDay {
     fn find_all_reflections(&self, r: usize, c: usize, need: bool) -> Vec<Orientation>;
 }
-impl IDay for Vec<Vec<char>> {
-    fn find_all_reflections(&self, r: usize, c: usize, need: bool) -> Vec<Orientation> {
+
+impl IDay for Grid<char> {
+    fn find_all_reflections(&self, row: usize, column: usize, need: bool) -> Vec<Orientation> {
         let mut result = vec![];
-        for x in find_reflecting_rows(self, r, need) {
+        for x in find_reflecting_rows(self, row, need) {
             result.push(Orientation::Horizontal(x))
         }
-        for x in find_reflecting_rows(&transpose(self), c, need) {
+
+        for x in find_reflecting_rows(&self.transpose(), column, need) {
             result.push(Orientation::Vertical(x))
         }
         result
     }
 }
 
-fn find_reflecting_rows(grid: &Vec<Vec<char>>, r: usize, need: bool) -> Vec<usize> {
+fn find_reflecting_rows(grid: &Grid<char>, row: usize, need: bool) -> Vec<usize> {
     let mut result = vec![];
+    let grid = grid.to_2d();
+
     for split_index in 1..(grid.len()) {
         let mut x = split_index - 1;
         let mut x_one = split_index;
@@ -120,6 +114,7 @@ fn find_reflecting_rows(grid: &Vec<Vec<char>>, r: usize, need: bool) -> Vec<usiz
         let mut counts = 0;
         let mut used = false;
 
+
         loop {
             if grid[x] == grid[x_one] {
                 counts += 1;
@@ -127,7 +122,7 @@ fn find_reflecting_rows(grid: &Vec<Vec<char>>, r: usize, need: bool) -> Vec<usiz
                 good = false;
             }
 
-            if x == r || x_one == r {
+            if x == row || x_one == row {
                 used = true;
             }
 
@@ -156,13 +151,18 @@ impl FromStr for Day {
 
 
         for grid_str in grids_str {
-            let mut data = vec![];
+            let data = grid_str.lines()
+                .flat_map(|line| { line.chars() })
+                .collect::<Vec<_>>();
 
-            for line in grid_str.lines() {
-                data.push(line.chars().collect::<Vec<_>>())
-            }
+            let height = grid_str.lines().count();
+            let width = if let Some(line) = grid_str.lines().next() {
+                line.chars().count()
+            } else {
+                0
+            };
 
-            grids.push(data);
+            grids.push(Grid::new(width, height, data));
         }
 
 
