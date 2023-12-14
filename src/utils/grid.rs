@@ -1,7 +1,7 @@
 use std::fmt::{Debug, Formatter};
 use std::ops::{Index, IndexMut};
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Eq, Hash, PartialEq)]
 pub struct Grid<T> {
     pub width: usize,
     pub height: usize,
