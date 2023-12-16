@@ -1,5 +1,5 @@
 use std::fmt::{Debug, Formatter};
-use std::ops::{Index, IndexMut};
+use std::ops::{Add, Index, IndexMut};
 
 #[derive(Default, Clone, Eq, Hash, PartialEq)]
 pub struct Grid<T> {
@@ -40,6 +40,10 @@ impl Debug for Grid<char> {
 }
 
 impl<T: Clone> Grid<T> {
+    pub fn in_bounds(&self, x: usize, y: usize) -> bool {
+        return x >= 0 && x < self.width && y >= 0 && y < self.height
+    }
+
     pub fn transpose(&self) -> Grid<T> {
         let mut transposed_data = Vec::with_capacity(self.data.len());
 
@@ -101,6 +105,43 @@ impl<T> IndexMut<(usize, usize)> for Grid<T> {
 }
 
 pub type Coord = (usize, usize);
+
+#[derive(Debug, Default, Clone, Eq, PartialEq, Hash)]
+pub struct Vec2 {
+    pub x: isize,
+    pub y: isize
+}
+
+impl Vec2 {
+    pub fn new(x: isize, y: isize) -> Self {
+        Vec2 {
+            x,
+            y
+        }
+    }
+}
+impl Add for Vec2 {
+    type Output = Vec2;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Vec2 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
+
+impl Add for &Vec2 {
+    type Output = Vec2;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Vec2 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
 
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub struct IteratorResult {
