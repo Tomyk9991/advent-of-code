@@ -39,6 +39,17 @@ impl Debug for Grid<char> {
     }
 }
 
+impl Debug for Grid<usize> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if self.data.is_empty() {
+            write!(f, "")
+        } else {
+            let s = self.data.chunks(self.width).map(|a| format!("{:?}", a)).collect::<Vec<_>>();
+            write!(f, "{}", s.join("\n"))
+        }
+    }
+}
+
 impl<T: Clone> Grid<T> {
     pub fn in_bounds(&self, x: isize, y: isize) -> bool {
         x >= 0 && x < self.width as isize && y >= 0 && y < self.height as isize
