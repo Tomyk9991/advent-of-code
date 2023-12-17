@@ -40,8 +40,8 @@ impl Debug for Grid<char> {
 }
 
 impl<T: Clone> Grid<T> {
-    pub fn in_bounds(&self, x: usize, y: usize) -> bool {
-        return x >= 0 && x < self.width && y >= 0 && y < self.height
+    pub fn in_bounds(&self, x: isize, y: isize) -> bool {
+        x >= 0 && x < self.width as isize && y >= 0 && y < self.height as isize
     }
 
     pub fn transpose(&self) -> Grid<T> {

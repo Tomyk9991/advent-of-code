@@ -14,7 +14,7 @@ impl FromStr for Operation {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match &s.split(" ").collect::<Vec<&str>>()[..] {
+        match &s.split(' ').collect::<Vec<&str>>()[..] {
             [_label, "=", number] => {
                 Ok(Operation::Assign(number.parse::<usize>()?))
             }
@@ -48,7 +48,7 @@ impl CustomHashOperation for String {
             value %= 256;
         }
 
-        return value as usize;
+        value as usize
     }
 }
 
@@ -137,7 +137,7 @@ impl FromStr for Day {
                         .map(|a| a.to_string())
                         .collect::<Vec<String>>()[0].clone(),
                     operation: Operation::from_str(&sequence
-                        .replace("=", " = ")
+                        .replace('=', " = ")
                     ).unwrap_or_default(),
                 }
             }).collect::<Vec<_>>(),
