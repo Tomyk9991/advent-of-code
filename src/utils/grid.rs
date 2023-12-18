@@ -1,5 +1,5 @@
 use std::fmt::{Debug, Formatter};
-use std::ops::{Add, Index, IndexMut};
+use std::ops::{Add, AddAssign, Index, IndexMut};
 
 #[derive(Default, Clone, Eq, Hash, PartialEq)]
 pub struct Grid<T> {
