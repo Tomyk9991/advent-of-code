@@ -64,7 +64,7 @@ impl crate::aoc::Day for Day {
                 Direction::Left(d) => current_position.0 -= d as isize,
                 Direction::Right(d) => current_position.0 += d as isize
             };
-            current_position.clone()
+            current_position
         }).collect::<Vec<_>>();
 
         let area = shoelace_formula_area(&polygons);
@@ -85,7 +85,7 @@ impl crate::aoc::Day for Day {
                 Direction::Left(d) => current_position.0 -= d as isize,
                 Direction::Right(d) => current_position.0 += d as isize
             };
-            current_position.clone()
+            current_position
         }).collect::<Vec<_>>();
 
         let area = shoelace_formula_area(&polygons);
@@ -100,15 +100,13 @@ fn hex_to_direction(hex: &str) -> Direction {
     let direction = hex.pop().unwrap();
 
     let length = usize::from_str_radix(&hex[1..6], 16).unwrap_or(0);
-    let direction = match direction {
+    match direction {
         '0' => Direction::Right(length),
         '1' => Direction::Down(length),
         '2' => Direction::Left(length),
         '3' => Direction::Up(length),
         _ => Direction::Up(0)
-    };
-
-    direction
+    }
 }
 
 fn shoelace_formula_area(polygon: &[(isize, isize)]) -> usize {
@@ -143,11 +141,11 @@ impl FromStr for Day {
             if let [direction, amount, color] = &line.split(' ').collect::<Vec<_>>()[..] {
                 return Some(Instruction {
                     direction: Direction::from_str(direction, amount),
-                    color: color.replace('(', "").replace(')', "").to_string(),
+                    color: color.replace(['(', ')'], "").to_string(),
                 });
             }
 
-            return None;
+            None
         }).collect::<Vec<_>>();
 
         Ok(Self {
