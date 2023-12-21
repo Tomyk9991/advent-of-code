@@ -2,8 +2,6 @@ use std::collections::{HashMap, VecDeque};
 use std::fmt::Debug;
 use std::str::FromStr;
 
-use itertools::Itertools;
-
 use crate::aoc::Error;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -143,9 +141,6 @@ impl crate::aoc::Day for Day {
     }
 
     fn solution2(&mut self) -> anyhow::Result<Self::Output> {
-        if self.gates.len() == 0 || self.broadcast_outputs.len() == 0 {
-            return Ok(0);
-        }
         // find every name where rx is in output
         let feed = self.gates.iter().filter_map(|(name, gate)| {
             if gate.outputs.contains(&String::from("rx")) { Some(name.to_string()) } else { None }
@@ -163,6 +158,7 @@ impl crate::aoc::Day for Day {
 
         // origin, target, pulse
         type Format = (String, String, String);
+        #[allow(unused_assignments)]
         let mut result = 0;
 
         'outer: loop {
@@ -178,10 +174,10 @@ impl crate::aoc::Day for Day {
                         }
 
                         if !cycle_lengths.contains_key(&origin) {
-                            cycle_lengths.insert(origin.to_string(), presses.clone());
+                            cycle_lengths.insert(origin.clone(), presses);
                         }
 
-                        if seen.values().into_iter().all(|a| *a > 0) {
+                        if seen.values().all(|a| *a > 0) {
                             let mut x = 1;
 
                             for cycle_length in cycle_lengths.values() {
@@ -256,7 +252,7 @@ impl FromStr for Day {
                 if *left == "broadcaster" {
                     broadcast_outputs = outputs;
                 } else {
-                    let ty = left.chars().nth(0).unwrap_or(' ');
+                    let ty = left.chars().next().unwrap_or(' ');
                     let name = &left[1..];
 
                     gates.insert(name.to_string(), LogicGate::new(name, ty, outputs));
@@ -278,10 +274,7 @@ impl FromStr for Day {
 
         for p in populate {
             if let Some(gate) = gates.get_mut(&p.0) {
-                match gate.memory {
-                    Memory::On(ref mut hashmap) => { hashmap.insert(p.1, p.2); }
-                    _ => {}
-                }
+                if let Memory::On(ref mut hashmap) = gate.memory { hashmap.insert(p.1, p.2); }
             }
         }
 
