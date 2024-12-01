@@ -1,9 +1,10 @@
 use std::{fs};
 
 fn main() {
-    let day_folder = "./src/year2023/";
+    let year = 2024;
+    let day_folder = format!("./src/year{}/", year);
 
-    let num_days = fs::read_dir(day_folder)
+    let num_days = fs::read_dir(&day_folder)
         .unwrap_or_else(|_| panic!("Unable to read directory {day_folder}"))
         .filter_map(|entry| entry.ok())
         .filter(|entry| entry.file_type().map(|ft| ft.is_dir()).unwrap_or(false))
@@ -14,16 +15,14 @@ fn main() {
 use std::time::Instant;
 use crate::aoc::Day;
 
-pub mod year2019;
-pub mod year2022;
-pub mod year2023;
+pub mod year{year};
 pub mod utils;
 pub mod aoc;
 
 fn main() -> anyhow::Result<()> {{
-    type CurrentDay = year2023::day{num_days:02}::Day;
+    type CurrentDay = year{year}::day{num_days:02}::Day;
 
-    let mut day = CurrentDay::from_str(include_str!("./year2023/day{num_days:02}/input.txt"))?;
+    let mut day = CurrentDay::from_str(include_str!("./year{year}/day{num_days:02}/input.txt"))?;
 
     day.test_1()?;
     day.after_test_1();
