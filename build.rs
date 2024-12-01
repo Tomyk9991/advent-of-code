@@ -47,9 +47,9 @@ fn main() -> anyhow::Result<()> {{
     }
 
 
-    fs::write(mod_rs_path, mod_rs).expect("Unable to write to year2023/mod.rs");
+    fs::write(mod_rs_path, mod_rs).expect(&format!("Unable to write to year{year}/mod.rs"));
     fs::write(main_rs_path, main_rs).expect("Unable to write to main.rs");
 
-    println!("cargo:rerun-if-changed=./src/year2023");
+    println!(format!("cargo:rerun-if-changed=./src/year{year}"));
     println!("cargo:rerun-if-changed=build.rs");
 }
