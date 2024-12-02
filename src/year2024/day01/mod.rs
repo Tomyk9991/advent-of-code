@@ -50,7 +50,7 @@ impl crate::aoc::Day for Day {
 
     fn solution2(&mut self) -> anyhow::Result<Self::Output> {
         // build a hashset, where you count the number of times a value from the left appears in the right list
-        let mut right_set = self.right_list.iter().fold(HashMap::new(), |mut acc, right| {
+        let right_set = self.right_list.iter().fold(HashMap::new(), |mut acc, right| {
             let count = acc.entry(*right).or_insert(0);
             *count += 1;
             acc
