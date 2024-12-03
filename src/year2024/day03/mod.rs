@@ -34,15 +34,6 @@ impl FromStr for Day {
                     "don" => instructions.push(Instruction::Dont),
                     _ => {}
                 }
-                // if capture_match.as_str().starts_with("mul") {
-                //     let arg1 = cap.get(1).map_or("", |m| m.as_str()).parse()?;
-                //     let arg2 = cap.get(2).map_or("", |m| m.as_str()).parse()?;
-                //     instructions.push(Instruction::Mul(arg1, arg2));
-                // } else if capture_match.as_str() == "do()" {
-                //     instructions.push(Instruction::Do);
-                // } else if capture_match.as_str() == "don't()" {
-                //     instructions.push(Instruction::Dont);
-                // }
             }
         }
 
