@@ -53,6 +53,12 @@ impl From<ParseIntError> for Error {
     }
 }
 
+impl From<regex::Error> for Error {
+    fn from(value: regex::Error) -> Self {
+        Error::StringParse(value.to_string())
+    }
+}
+
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", match self {
