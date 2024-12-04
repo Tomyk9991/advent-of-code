@@ -69,7 +69,7 @@ MXMXAXMASX", 9)]
                 let word: String = (0..target_word.len())
                     .map(|i| self.grid.get(((x as i32 + i as i32 * dx) as usize, (y as i32 + i as i32 * dy) as usize)))
                     .take_while(|&c| c.is_some())
-                    .map(|c| c.unwrap())
+                    .filter_map(|c| c)
                     .collect();
                 word == target_word || word == reversed_target_word
             })
