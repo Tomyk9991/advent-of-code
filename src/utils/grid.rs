@@ -70,9 +70,7 @@ impl<T: Clone> Grid<T> {
             data: transposed_data,
         }
     }
-}
 
-impl<T: Clone> Grid<T> {
     pub fn to_2d(&self) -> Vec<Vec<T>> {
         let mut result = Vec::with_capacity(self.height);
 
@@ -97,6 +95,21 @@ impl<T: Clone> Grid<T> {
         }
 
         None
+    }
+
+    pub fn find_all(&self, predicate: fn(&T) -> bool) -> Vec<(usize, usize)> {
+        self.data.iter()
+            .enumerate()
+            .filter_map(|(index, value)| predicate(value).then_some((index % self.width, index / self.width)))
+            .collect()
+    }
+
+    pub fn get(&self, coord: Coord) -> Option<&T> {
+        if self.in_bounds(coord.0 as isize, coord.1 as isize) {
+            Some(&self.data[coord.1 * self.width + coord.0])
+        } else {
+            None
+        }
     }
 }
 
