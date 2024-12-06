@@ -55,6 +55,14 @@ impl<T: Clone> Grid<T> {
         x >= 0 && x < self.width as isize && y >= 0 && y < self.height as isize
     }
 
+    pub fn width(&self) -> usize {
+        self.width
+    }
+
+    pub fn height(&self) -> usize {
+        self.height
+    }
+
     pub fn transpose(&self) -> Grid<T> {
         let mut transposed_data = Vec::with_capacity(self.data.len());
 

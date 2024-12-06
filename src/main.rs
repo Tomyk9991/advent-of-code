@@ -7,9 +7,9 @@ pub mod utils;
 pub mod aoc;
 
 fn main() -> anyhow::Result<()> {
-    type CurrentDay = year2024::day05::Day;
+    type CurrentDay = year2024::day06::Day;
 
-    let mut day = CurrentDay::from_str(include_str!("./year2024/day05/input.txt"))?;
+    let mut day = CurrentDay::from_str(include_str!("./year2024/day06/input.txt"))?;
 
     day.test_1()?;
     day.after_test_1();
