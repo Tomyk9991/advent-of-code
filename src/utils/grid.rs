@@ -1,11 +1,21 @@
 use std::fmt::{Debug, Formatter};
 use std::ops::{Add, Index, IndexMut};
+use std::slice::Iter;
 
 #[derive(Default, Clone, Eq, Hash, PartialEq)]
 pub struct Grid<T> {
     pub width: usize,
     pub height: usize,
     pub data: Vec<T>,
+}
+
+impl<'a, T> IntoIterator for &'a Grid<T> {
+    type Item = &'a T;
+    type IntoIter = Iter<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.data.iter()
+    }
 }
 
 pub enum Dimension {
@@ -105,7 +115,7 @@ impl<T: Clone> Grid<T> {
         None
     }
 
-    pub fn find_all(&self, predicate: fn(&T) -> bool) -> Vec<(usize, usize)> {
+    pub fn find_all(&self, predicate: impl Fn(&T) -> bool) -> Vec<(usize, usize)> {
         self.data.iter()
             .enumerate()
             .filter_map(|(index, value)| predicate(value).then_some((index % self.width, index / self.width)))
