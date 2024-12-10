@@ -1,6 +1,7 @@
-use std::fmt::{Debug, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 use std::ops::{Add, Index, IndexMut};
 use std::slice::Iter;
+use thiserror::Error;
 
 #[derive(Default, Clone, Eq, Hash, PartialEq)]
 pub struct Grid<T> {
@@ -8,6 +9,29 @@ pub struct Grid<T> {
     pub height: usize,
     pub data: Vec<T>,
 }
+
+#[derive(Debug, Error)]
+pub enum Error {
+    OutOfBounds(Coord),
+}
+
+impl Display for Error {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Out of bounds: {:?}", self)
+    }
+}
+
+impl<T: Debug> Debug for Grid<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if self.data.is_empty() {
+            write!(f, "")
+        } else {
+            let s = self.data.chunks(self.width).map(|a| format!("{:?}", a)).collect::<Vec<_>>();
+            write!(f, "{}", s.join("\n"))
+        }
+    }
+}
+
 
 impl<'a, T> IntoIterator for &'a Grid<T> {
     type Item = &'a T;
@@ -35,28 +59,6 @@ impl Distance for Coord {
 
     fn manhattan_distance(&self, other: &Self) -> usize {
         (self.0.abs_diff(other.0)) + (self.1.abs_diff(other.1))
-    }
-}
-
-impl Debug for Grid<char> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if self.data.is_empty() {
-            write!(f, "")
-        } else {
-            let s = self.data.chunks(self.width).map(|a| a.iter().collect::<String>()).collect::<Vec<_>>();
-            write!(f, "{}", s.join("\n"))
-        }
-    }
-}
-
-impl Debug for Grid<usize> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if self.data.is_empty() {
-            write!(f, "")
-        } else {
-            let s = self.data.chunks(self.width).map(|a| format!("{:?}", a)).collect::<Vec<_>>();
-            write!(f, "{}", s.join("\n"))
-        }
     }
 }
 
