@@ -3,7 +3,6 @@ use std::collections::{HashMap, HashSet, VecDeque};
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
 use std::rc::{Rc, Weak};
-use itertools::Itertools;
 use crate::utils::grid::{Coord, Grid};
 
 #[derive(Default, Clone)]
