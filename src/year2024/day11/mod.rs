@@ -28,12 +28,12 @@ impl crate::aoc::Day for Day {
 
     fn solution1(&mut self) -> anyhow::Result<Self::Output> {
         let mut hash_map: HashMap<(u64, u32), u64> = HashMap::new();
-        Ok(self.list.iter().fold(0, |acc, x| acc + solve(*x, 25, &mut hash_map).unwrap()) as usize)
+        Ok(self.list.iter().fold(0, |acc, x| acc + solve(*x, 25, &mut hash_map).unwrap_or(0)) as usize)
     }
 
     fn solution2(&mut self) -> anyhow::Result<Self::Output> {
         let mut hash_map: HashMap<(u64, u32), u64> = HashMap::new();
-        Ok(self.list.iter().fold(0, |acc, x| acc + solve(*x, 75, &mut hash_map).unwrap()) as usize)
+        Ok(self.list.iter().fold(0, |acc, x| acc + solve(*x, 75, &mut hash_map).unwrap_or(0)) as usize)
     }
 }
 fn solve(x: u64, t: u32, hash_map: &mut HashMap<(u64, u32), u64>) -> anyhow::Result<u64> {
