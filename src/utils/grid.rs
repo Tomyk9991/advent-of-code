@@ -105,6 +105,46 @@ impl<T: Clone> Grid<T> {
         result
     }
 
+    /// floorfills the grid. it looks for identical values and stores the positions in a vector. the returnvalue is a Vec<Vec<Coord>> where the inner vector contains all positions of the connected values
+    pub fn floor_fill(&self, is_adjacent: impl Fn(&T, &T) -> bool) -> Vec<Vec<(usize, usize)>> {
+        let mut visited = vec![vec![false; self.width]; self.height];
+        let mut result = Vec::new();
+
+        for y in 0..self.height {
+            for x in 0..self.width {
+                if visited[y][x] {
+                    continue;
+                }
+
+                let mut stack = vec![(x, y)];
+                let mut current_group = Vec::new();
+                let current_segment_value = self[(x, y)].clone();
+
+                while let Some((x, y)) = stack.pop() {
+                    if visited[y][x] {
+                        continue;
+                    }
+
+                    visited[y][x] = true;
+                    current_group.push((x, y));
+
+                    for (dx, dy) in &[(0, 1), (1, 0), (0, -1), (-1, 0)] {
+                        let new_x = x as isize + dx;
+                        let new_y = y as isize + dy;
+
+                        if self.in_bounds(new_x, new_y) && !visited[new_y as usize][new_x as usize] && is_adjacent(&current_segment_value, &self[(new_x as usize, new_y as usize)]) {
+                            stack.push((new_x as usize, new_y as usize));
+                        }
+                    }
+                }
+
+                result.push(current_group);
+            }
+        }
+
+        result
+    }
+
     pub fn find(&self, predicate: fn(&T) -> bool) -> Option<(usize, usize)> {
         let index = self.data.iter()
             .enumerate()
