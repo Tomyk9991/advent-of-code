@@ -19,7 +19,7 @@ impl FromStr for Day {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let input = s.lines().map(|line| {
-            let mut parts = line.split(&['=', ' ', ','][..]).collect::<Vec<_>>();
+            let parts = line.split(&['=', ' ', ','][..]).collect::<Vec<_>>();
 
             let position = (parts[1], parts[2]);
             let velocity = (parts[4], parts[5]);

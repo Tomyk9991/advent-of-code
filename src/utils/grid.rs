@@ -32,6 +32,17 @@ impl<T: Debug> Debug for Grid<T> {
     }
 }
 
+impl<T: Display> Display for Grid<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if self.data.is_empty() {
+            write!(f, "")
+        } else {
+            let s = self.data.chunks(self.width).map(|a| format!("{}", a.iter().map(|a| a.to_string()).collect::<Vec<_>>().join(""))).collect::<Vec<_>>();
+            write!(f, "{}", s.join("\n"))
+        }
+    }
+}
+
 
 impl<'a, T> IntoIterator for &'a Grid<T> {
     type Item = &'a T;
