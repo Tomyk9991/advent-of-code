@@ -54,8 +54,8 @@ impl FromStr for Day {
             width = line.len();
             line.chars().map(|c| c.into()).collect::<Vec<char>>()
         })
-        .flatten()
-        .collect::<Vec<char>>();
+            .flatten()
+            .collect::<Vec<char>>();
         let height = grid_str.len();
 
         Ok(Day {
@@ -148,7 +148,7 @@ vv"#, 1)*/]
         let mut grid = self.grid.clone();
 
         for instruction in &self.instructions {
-            let mut player_position = grid.find(|a| *a == '@').ok_or(crate::aoc::Error::NoSolutionFound)?;
+            let player_position = grid.find(|a| *a == '@').ok_or(crate::aoc::Error::NoSolutionFound)?;
 
             let next_position = match instruction {
                 Instruction::Top => (player_position.0, player_position.1 - 1),
@@ -203,7 +203,6 @@ vv"#, 1)*/]
                     '.' => {
                         grid[(next_position.0, next_position.1)] = '@';
                         grid[(player_position.0, player_position.1)] = '.';
-                        player_position = next_position;
                     },
                     _ => {}
                 }
@@ -254,7 +253,7 @@ vv"#, 1)*/]
                             if let Some('.') = grid.get(current_box_fragment) {
                                 continue;
                             }
-                            let mut next_next_position = match instruction {
+                            let next_next_position = match instruction {
                                 Instruction::Top => (current_box_fragment.0, current_box_fragment.1 - 1),
                                 Instruction::Bottom => (current_box_fragment.0, current_box_fragment.1 + 1),
                                 Instruction::Left => (current_box_fragment.0 - 1, current_box_fragment.1),
@@ -360,9 +359,8 @@ fn transform(grid: &Grid<char>) -> Grid<char> {
     // If the tile is ., the new map contains .. instead.
     // If the tile is @, the new map contains @. instead.
     let mut transformed_data = vec![];
-    let mut last_index = grid.data.len();
 
-    grid.data.iter().enumerate().for_each(|(index, c)| {
+    grid.data.iter().for_each(|c| {
         match c {
             '#' => {
                 transformed_data.push('#');
