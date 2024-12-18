@@ -47,8 +47,76 @@ where
     None
 }
 
+fn neighbours(state: &State, grid: &Grid<char>) -> Vec<State> {
+    let mut neighbors = Vec::new();
+    let (x, y) = state.position;
+
+    if grid.in_bounds(x as isize, y as isize - 1) && grid[(x, y - 1)] != '#' {
+        neighbors.push(State { position: (x, y - 1), direction: state.direction.clone() });
+    }
+    if grid.in_bounds(x as isize + 1, y as isize) && grid[(x + 1, y)] != '#' {
+        neighbors.push(State { position: (x + 1, y), direction: state.direction.clone() });
+    }
+    if grid.in_bounds(x as isize, y as isize + 1) && grid[(x, y + 1)] != '#' {
+        neighbors.push(State { position: (x, y + 1), direction: state.direction.clone() });
+    }
+    if grid.in_bounds(x as isize - 1, y as isize) && grid[(x - 1, y)] != '#' {
+        neighbors.push(State { position: (x - 1, y), direction: state.direction.clone() });
+    }
+
+    neighbors
+}
+pub fn a_star_in_place_grid<F, G, H>(start: State, goal: (usize, usize), h: H, g: G, f: F, grid: &Grid<char>) -> Option<(Vec<State>, i32)>
+where
+    F: Fn(&State, i32, i32) -> i32,
+    G: Fn(&State, &State) -> i32,
+    H: Fn(&State, (usize, usize)) -> i32,
+{
+    let mut open_set = BinaryHeap::new();
+    let mut came_from: HashMap<State, State> = HashMap::new();
+    let mut g_scores = HashMap::new();
+
+    g_scores.insert(start.clone(), 0);
+    open_set.push(Node {
+        state: start.clone(),
+        f_score: f(&start, 0, h(&start, goal)),
+        g_score: 0,
+    });
+
+    while let Some(current) = open_set.pop() {
+        if current.state.position == goal {
+            let mut path = vec![current.state.clone()];
+            let mut current_state = &current.state;
+            while let Some(prev_state) = came_from.get(current_state) {
+                path.push(prev_state.clone());
+                current_state = prev_state;
+            }
+            path.reverse();
+            return Some((path, current.g_score));
+        }
+
+        for neighbor in neighbours(&current.state, grid) {
+            let tentative_g_score = g_scores[&current.state] + g(&current.state, &neighbor);
+
+            if tentative_g_score < *g_scores.get(&neighbor).unwrap_or(&i32::MAX) {
+                came_from.insert(neighbor.clone(), current.state.clone());
+                g_scores.insert(neighbor.clone(), tentative_g_score);
+                let h_score = h(&neighbor, goal);
+                open_set.push(Node {
+                    state: neighbor.clone(),
+                    f_score: f(&neighbor, tentative_g_score, h_score),
+                    g_score: tentative_g_score,
+                });
+            }
+        }
+    }
+
+    None
+}
+
 use std::collections::{BinaryHeap, HashMap};
 use std::cmp::Ordering;
+use crate::utils::grid::Grid;
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct State {

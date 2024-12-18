@@ -203,6 +203,7 @@ fn find_solution(program: &[u64], answer: u64, original_program: &Vec<u64>) -> O
 
 fn to_combo_operand(operand: u32, registers: &[u32; 3]) -> u32 {
     match operand {
+        #[allow(unused_comparisons)]
         a if a >= 0 && a <= 3 => a,
         4 => registers[A_REG],
         5 => registers[B_REG],
