@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 use std::str::FromStr;
-use crate::utils::a_star::{a_star, a_star_all_paths, Direction, State};
+use crate::utils::a_star_impl::{a_star, a_star_all_paths, Direction, StateDirection};
 use crate::utils::grid::Grid;
 
 
@@ -85,46 +85,46 @@ impl crate::aoc::Day for Day {
     fn solution1(&mut self) -> anyhow::Result<Self::Output> {
         let start_position = self.grid.find(|a| *a == 'S').ok_or(crate::aoc::Error::NoSolutionFound)?;
 
-        let start = State {
+        let start = StateDirection {
             position: start_position,
             direction: Direction::East,
         };
 
         let goal = self.grid.find(|a| *a == 'E').ok_or(crate::aoc::Error::NoSolutionFound)?;
 
-        let h = |state: &State, goal: (usize, usize)| {
+        let h = |state: &StateDirection, goal: (usize, usize)| {
             // 0
             (state.position.0 as i32 - goal.0 as i32).abs() + (state.position.1 as i32 - goal.1 as i32).abs()
         };
 
-        let g = |current: &State, next: &State| {
+        let g = |current: &StateDirection, next: &StateDirection| {
             if current.position == next.position { 1000 } else { 1 }
         };
 
-        let f = |_state: &State, g: i32, h: i32| g + h;
+        let f = |_state: &StateDirection, g: i32, h: i32| g + h;
 
-        let get_neighbours = |state: &State| {
+        let get_neighbours = |state: &StateDirection| {
             let mut neighbors = Vec::new();
             let (x, y) = state.position;
 
             match state.direction {
                 Direction::North if self.grid.in_bounds(x as isize, y as isize - 1) && self.grid[(x, y - 1)] != '#' => {
-                    neighbors.push(State { position: (x, y - 1), direction: state.direction.clone() });
+                    neighbors.push(StateDirection { position: (x, y - 1), direction: state.direction.clone() });
                 }
                 Direction::East if self.grid.in_bounds(x as isize + 1, y as isize) && self.grid[(x + 1, y)] != '#' => {
-                    neighbors.push(State { position: (x + 1, y), direction: state.direction.clone() });
+                    neighbors.push(StateDirection { position: (x + 1, y), direction: state.direction.clone() });
                 }
                 Direction::South if self.grid.in_bounds(x as isize, y as isize + 1) && self.grid[(x, y + 1)] != '#' => {
-                    neighbors.push(State { position: (x, y + 1), direction: state.direction.clone() });
+                    neighbors.push(StateDirection { position: (x, y + 1), direction: state.direction.clone() });
                 }
                 Direction::West if self.grid.in_bounds(x as isize - 1, y as isize) && self.grid[(x - 1, y)] != '#' => {
-                    neighbors.push(State { position: (x - 1, y), direction: state.direction.clone() });
+                    neighbors.push(StateDirection { position: (x - 1, y), direction: state.direction.clone() });
                 }
                 _ => {}
             }
 
             // Rotate clockwise
-            neighbors.push(State {
+            neighbors.push(StateDirection {
                 position: state.position,
                 direction: match state.direction {
                     Direction::North => Direction::East,
@@ -135,7 +135,7 @@ impl crate::aoc::Day for Day {
             });
 
             // Rotate counterclockwise
-            neighbors.push(State {
+            neighbors.push(StateDirection {
                 position: state.position,
                 direction: match state.direction {
                     Direction::North => Direction::West,
@@ -156,45 +156,45 @@ impl crate::aoc::Day for Day {
         // instead of using came_from, the state itself stores the previous state
         let start_position = self.grid.find(|a| *a == 'S').ok_or(crate::aoc::Error::NoSolutionFound)?;
 
-        let start = State {
+        let start = StateDirection {
             position: start_position,
             direction: Direction::East,
         };
 
         let goal = self.grid.find(|a| *a == 'E').ok_or(crate::aoc::Error::NoSolutionFound)?;
 
-        let h = |state: &State, goal: (usize, usize)| {
+        let h = |state: &StateDirection, goal: (usize, usize)| {
             (state.position.0 as i32 - goal.0 as i32).abs() + (state.position.1 as i32 - goal.1 as i32).abs()
         };
 
-        let g = |current: &State, next: &State| {
+        let g = |current: &StateDirection, next: &StateDirection| {
             if current.position == next.position { 1000 } else { 1 }
         };
 
-        let f = |_state: &State, g: i32, h: i32| g + h;
+        let f = |_state: &StateDirection, g: i32, h: i32| g + h;
 
-        let get_neighbours = |state: &State| {
+        let get_neighbours = |state: &StateDirection| {
             let mut neighbors = Vec::new();
             let (x, y) = state.position;
 
             match state.direction {
                 Direction::North if self.grid.in_bounds(x as isize, y as isize - 1) && self.grid[(x, y - 1)] != '#' => {
-                    neighbors.push(State { position: (x, y - 1), direction: state.direction.clone() });
+                    neighbors.push(StateDirection { position: (x, y - 1), direction: state.direction.clone() });
                 }
                 Direction::East if self.grid.in_bounds(x as isize + 1, y as isize) && self.grid[(x + 1, y)] != '#' => {
-                    neighbors.push(State { position: (x + 1, y), direction: state.direction.clone() });
+                    neighbors.push(StateDirection { position: (x + 1, y), direction: state.direction.clone() });
                 }
                 Direction::South if self.grid.in_bounds(x as isize, y as isize + 1) && self.grid[(x, y + 1)] != '#' => {
-                    neighbors.push(State { position: (x, y + 1), direction: state.direction.clone() });
+                    neighbors.push(StateDirection { position: (x, y + 1), direction: state.direction.clone() });
                 }
                 Direction::West if self.grid.in_bounds(x as isize - 1, y as isize) && self.grid[(x - 1, y)] != '#' => {
-                    neighbors.push(State { position: (x - 1, y), direction: state.direction.clone() });
+                    neighbors.push(StateDirection { position: (x - 1, y), direction: state.direction.clone() });
                 }
                 _ => {}
             }
 
             // Rotate clockwise
-            neighbors.push(State {
+            neighbors.push(StateDirection {
                 position: state.position,
                 direction: match state.direction {
                     Direction::North => Direction::East,
@@ -205,7 +205,7 @@ impl crate::aoc::Day for Day {
             });
 
             // Rotate counterclockwise
-            neighbors.push(State {
+            neighbors.push(StateDirection {
                 position: state.position,
                 direction: match state.direction {
                     Direction::North => Direction::West,

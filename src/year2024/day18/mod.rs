@@ -1,6 +1,6 @@
 use std::str::FromStr;
 use itertools::Itertools;
-use crate::utils::a_star::{a_star, a_star_in_place_grid, Direction, State};
+use crate::utils::a_star_impl::{a_star, a_star_in_place_grid, Direction, StateDirection};
 use crate::utils::grid::{Coord, Distance, Grid};
 
 #[derive(Default, Clone, Debug)]
@@ -100,37 +100,37 @@ impl crate::aoc::Day for Day {
             grid[(*x, *y)] =  '#';
         });
 
-        let start = State {
+        let start = StateDirection {
             position: (0, 0),
             direction: Direction::North,
         };
 
-        let h = |state: &State, goal: (usize, usize)| {
+        let h = |state: &StateDirection, goal: (usize, usize)| {
             // 0
             (state.position.0 as i32 - goal.0 as i32).abs() + (state.position.1 as i32 - goal.1 as i32).abs()
         };
 
-        let g = |current: &State, next: &State| {
+        let g = |current: &StateDirection, next: &StateDirection| {
             current.position.manhattan_distance(&next.position) as i32
         };
 
-        let f = |_state: &State, g: i32, h: i32| g + h;
+        let f = |_state: &StateDirection, g: i32, h: i32| g + h;
 
-        let get_neighbours = |state: &State| {
+        let get_neighbours = |state: &StateDirection| {
             let mut neighbors = Vec::new();
             let (x, y) = state.position;
 
             if grid.in_bounds(x as isize, y as isize - 1) && grid[(x, y - 1)] != '#' {
-                neighbors.push(State { position: (x, y - 1), direction: state.direction.clone() });
+                neighbors.push(StateDirection { position: (x, y - 1), direction: state.direction.clone() });
             }
             if grid.in_bounds(x as isize + 1, y as isize) && grid[(x + 1, y)] != '#' {
-                neighbors.push(State { position: (x + 1, y), direction: state.direction.clone() });
+                neighbors.push(StateDirection { position: (x + 1, y), direction: state.direction.clone() });
             }
             if grid.in_bounds(x as isize, y as isize + 1) && grid[(x, y + 1)] != '#' {
-                neighbors.push(State { position: (x, y + 1), direction: state.direction.clone() });
+                neighbors.push(StateDirection { position: (x, y + 1), direction: state.direction.clone() });
             }
             if grid.in_bounds(x as isize - 1, y as isize) && grid[(x - 1, y)] != '#' {
-                neighbors.push(State { position: (x - 1, y), direction: state.direction.clone() });
+                neighbors.push(StateDirection { position: (x - 1, y), direction: state.direction.clone() });
             }
 
             neighbors
@@ -155,22 +155,22 @@ impl crate::aoc::Day for Day {
             grid[(*x, *y)] =  '#';
         });
 
-        let start = State {
+        let start = StateDirection {
             position: (0, 0),
             direction: Direction::North,
         };
         let end = ((self.width as i32 - 1) as usize, (self.height as i32 - 1) as usize);
 
-        let h = |state: &State, goal: (usize, usize)| {
+        let h = |state: &StateDirection, goal: (usize, usize)| {
             // 0
             (state.position.0 as i32 - goal.0 as i32).abs() + (state.position.1 as i32 - goal.1 as i32).abs()
         };
 
-        let g = |current: &State, next: &State| {
+        let g = |current: &StateDirection, next: &StateDirection| {
             current.position.manhattan_distance(&next.position) as i32
         };
 
-        let f = |_state: &State, g: i32, h: i32| g + h;
+        let f = |_state: &StateDirection, g: i32, h: i32| g + h;
 
 
         let mut iter = self.byte_positions.iter().skip(self.amount_bytes);

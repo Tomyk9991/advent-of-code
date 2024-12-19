@@ -1,12 +1,12 @@
-pub fn a_star<F, G, H, Neighbour>(start: State, goal: (usize, usize), h: H, g: G, f: F, neighbour: Neighbour) -> Option<(Vec<State>, i32)>
+pub fn a_star<F, G, H, Neighbour>(start: StateDirection, goal: (usize, usize), h: H, g: G, f: F, neighbour: Neighbour) -> Option<(Vec<StateDirection>, i32)>
 where
-    F: Fn(&State, i32, i32) -> i32,
-    G: Fn(&State, &State) -> i32,
-    H: Fn(&State, (usize, usize)) -> i32,
-    Neighbour: Fn(&State) -> Vec<State>,
+    F: Fn(&StateDirection, i32, i32) -> i32,
+    G: Fn(&StateDirection, &StateDirection) -> i32,
+    H: Fn(&StateDirection, (usize, usize)) -> i32,
+    Neighbour: Fn(&StateDirection) -> Vec<StateDirection>,
 {
     let mut open_set = BinaryHeap::new();
-    let mut came_from: HashMap<State, State> = HashMap::new();
+    let mut came_from: HashMap<StateDirection, StateDirection> = HashMap::new();
     let mut g_scores = HashMap::new();
 
     g_scores.insert(start.clone(), 0);
@@ -47,33 +47,33 @@ where
     None
 }
 
-fn neighbours(state: &State, grid: &Grid<char>) -> Vec<State> {
+fn neighbours(state: &StateDirection, grid: &Grid<char>) -> Vec<StateDirection> {
     let mut neighbors = Vec::new();
     let (x, y) = state.position;
 
     if grid.in_bounds(x as isize, y as isize - 1) && grid[(x, y - 1)] != '#' {
-        neighbors.push(State { position: (x, y - 1), direction: state.direction.clone() });
+        neighbors.push(StateDirection { position: (x, y - 1), direction: state.direction.clone() });
     }
     if grid.in_bounds(x as isize + 1, y as isize) && grid[(x + 1, y)] != '#' {
-        neighbors.push(State { position: (x + 1, y), direction: state.direction.clone() });
+        neighbors.push(StateDirection { position: (x + 1, y), direction: state.direction.clone() });
     }
     if grid.in_bounds(x as isize, y as isize + 1) && grid[(x, y + 1)] != '#' {
-        neighbors.push(State { position: (x, y + 1), direction: state.direction.clone() });
+        neighbors.push(StateDirection { position: (x, y + 1), direction: state.direction.clone() });
     }
     if grid.in_bounds(x as isize - 1, y as isize) && grid[(x - 1, y)] != '#' {
-        neighbors.push(State { position: (x - 1, y), direction: state.direction.clone() });
+        neighbors.push(StateDirection { position: (x - 1, y), direction: state.direction.clone() });
     }
 
     neighbors
 }
-pub fn a_star_in_place_grid<F, G, H>(start: State, goal: (usize, usize), h: H, g: G, f: F, grid: &Grid<char>) -> Option<(Vec<State>, i32)>
+pub fn a_star_in_place_grid<F, G, H>(start: StateDirection, goal: (usize, usize), h: H, g: G, f: F, grid: &Grid<char>) -> Option<(Vec<StateDirection>, i32)>
 where
-    F: Fn(&State, i32, i32) -> i32,
-    G: Fn(&State, &State) -> i32,
-    H: Fn(&State, (usize, usize)) -> i32,
+    F: Fn(&StateDirection, i32, i32) -> i32,
+    G: Fn(&StateDirection, &StateDirection) -> i32,
+    H: Fn(&StateDirection, (usize, usize)) -> i32,
 {
     let mut open_set = BinaryHeap::new();
-    let mut came_from: HashMap<State, State> = HashMap::new();
+    let mut came_from: HashMap<StateDirection, StateDirection> = HashMap::new();
     let mut g_scores = HashMap::new();
 
     g_scores.insert(start.clone(), 0);
@@ -119,7 +119,7 @@ use std::cmp::Ordering;
 use crate::utils::grid::Grid;
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
-pub struct State {
+pub struct StateDirection {
     pub position: (usize, usize),
     pub direction: Direction,
 }
@@ -133,40 +133,40 @@ pub enum Direction {
 }
 
 #[derive(Eq, PartialEq, Debug)]
-struct Node {
-    state: State,
+struct Node<T> {
+    state: T,
     f_score: i32,
     g_score: i32,
 }
 
-impl Ord for Node {
+impl<T: Eq + PartialEq> Ord for Node<T> {
     fn cmp(&self, other: &Self) -> Ordering {
         other.f_score.cmp(&self.f_score)
     }
 }
 
-impl PartialOrd for Node {
+impl<T: Eq + PartialEq> PartialOrd for Node<T> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
 pub fn a_star_all_paths<F, G, H, Neighbour>(
-    start: State,
+    start: StateDirection,
     goal: (usize, usize),
     h: H,
     g: G,
     f: F,
     neighbour: Neighbour,
-) -> Option<(Vec<Vec<State>>, i32)>
+) -> Option<(Vec<Vec<StateDirection>>, i32)>
 where
-    F: Fn(&State, i32, i32) -> i32,
-    G: Fn(&State, &State) -> i32,
-    H: Fn(&State, (usize, usize)) -> i32,
-    Neighbour: Fn(&State) -> Vec<State>,
+    F: Fn(&StateDirection, i32, i32) -> i32,
+    G: Fn(&StateDirection, &StateDirection) -> i32,
+    H: Fn(&StateDirection, (usize, usize)) -> i32,
+    Neighbour: Fn(&StateDirection) -> Vec<StateDirection>,
 {
     let mut open_set = BinaryHeap::new();
-    let mut came_from: HashMap<State, Vec<State>> = HashMap::new();
+    let mut came_from: HashMap<StateDirection, Vec<StateDirection>> = HashMap::new();
     let mut g_scores = HashMap::new();
 
     g_scores.insert(start.clone(), 0);
