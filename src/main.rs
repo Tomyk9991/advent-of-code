@@ -2,14 +2,17 @@ use std::str::FromStr;
 use std::time::Instant;
 use crate::aoc::Day;
 
-pub mod year2024;
+pub mod year2025;
 pub mod utils;
 pub mod aoc;
 
 fn main() -> anyhow::Result<()> {
-    type CurrentDay = year2024::day19::Day;
+    type CurrentDay = year2025::day01::Day;
 
-    let mut day = CurrentDay::from_str(include_str!("./year2024/day19/input.txt"))?;
+    // running day in year
+    let mut day = CurrentDay::from_str(include_str!("./year2025/day01/input.txt"))?;
+
+    println!("Running Year 2025 Day 01");
 
     day.test_1()?;
     day.after_test_1();

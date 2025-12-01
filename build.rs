@@ -1,7 +1,7 @@
 use std::{fs};
 
 fn main() {
-    let year = 2024;
+    let year = 2025;
     let day_folder = format!("./src/year{}/", year);
 
     let num_days = fs::read_dir(&day_folder)
@@ -22,7 +22,10 @@ pub mod aoc;
 fn main() -> anyhow::Result<()> {{
     type CurrentDay = year{year}::day{num_days:02}::Day;
 
+    // running day in year
     let mut day = CurrentDay::from_str(include_str!("./year{year}/day{num_days:02}/input.txt"))?;
+
+    println!("Running Year {year} Day {num_days:02}");
 
     day.test_1()?;
     day.after_test_1();
