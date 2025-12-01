@@ -9,8 +9,6 @@ impl FromStr for Day {
     type Err = crate::aoc::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut lines = s.lines();
-
         Ok(Self {
             rotation: s.lines().map(|e| {
                 let (dir, val) = &e.split_at(1);

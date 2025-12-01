@@ -37,7 +37,7 @@ impl<T: Display> Display for Grid<T> {
         if self.data.is_empty() {
             write!(f, "")
         } else {
-            let s = self.data.chunks(self.width).map(|a| format!("{}", a.iter().map(|a| a.to_string()).collect::<Vec<_>>().join(""))).collect::<Vec<_>>();
+            let s = self.data.chunks(self.width).map(|a| a.iter().map(|a| a.to_string()).collect::<Vec<_>>().join("").to_string()).collect::<Vec<_>>();
             write!(f, "{}", s.join("\n"))
         }
     }

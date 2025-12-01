@@ -16,11 +16,7 @@ pub struct Node<T> {
 impl<T: Debug + Clone> Debug for Node<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let parent_name = if let Some(parent) = &self.parent {
-            if let Some(p) = parent.upgrade() {
-                Some(p.borrow().value.clone())
-            } else {
-                None
-            }
+            parent.upgrade().map(|p| p.borrow().value.clone())
         } else {
             None
         };
