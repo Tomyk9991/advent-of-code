@@ -7,12 +7,12 @@ pub mod utils;
 pub mod aoc;
 
 fn main() -> anyhow::Result<()> {
-    type CurrentDay = year2025::day01::Day;
+    type CurrentDay = year2025::day02::Day;
 
     // running day in year
-    let mut day = CurrentDay::from_str(include_str!("./year2025/day01/input.txt"))?;
+    let mut day = CurrentDay::from_str(include_str!("./year2025/day02/input.txt"))?;
 
-    println!("Running Year 2025 Day 01");
+    println!("Running Year 2025 Day 02");
 
     day.test_1()?;
     day.after_test_1();
