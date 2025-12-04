@@ -10,6 +10,29 @@ pub struct Grid<T> {
     pub data: Vec<T>,
 }
 
+impl<T> Grid<T> {
+    pub fn adjacent_coords_8(&self, x: usize, y: usize) -> Vec<Coord> {
+        let mut coords = Vec::new();
+
+        for dy in -1isize..=1 {
+            for dx in -1isize..=1 {
+                if dx == 0 && dy == 0 {
+                    continue;
+                }
+
+                let new_x = x as isize + dx;
+                let new_y = y as isize + dy;
+
+                if self.in_bounds(new_x, new_y) {
+                    coords.push((new_x as usize, new_y as usize));
+                }
+            }
+        }
+
+        coords
+    }
+}
+
 #[derive(Debug, Error)]
 pub enum Error {
     OutOfBounds(Coord),
@@ -73,7 +96,7 @@ impl Distance for Coord {
     }
 }
 
-impl<T: Clone> Grid<T> {
+impl<T> Grid<T> {
     pub fn in_bounds(&self, x: isize, y: isize) -> bool {
         x >= 0 && x < self.width as isize && y >= 0 && y < self.height as isize
     }
@@ -85,7 +108,9 @@ impl<T: Clone> Grid<T> {
     pub fn height(&self) -> usize {
         self.height
     }
+}
 
+impl<T: Clone> Grid<T> {
     pub fn transpose(&self) -> Grid<T> {
         let mut transposed_data = Vec::with_capacity(self.data.len());
 
@@ -323,5 +348,13 @@ impl<T> Grid<T> {
             height,
             data,
         }
+    }
+
+    pub fn from_raw_input(input: &str) -> Grid<char> {
+        Grid::<char>::new(
+            input.lines().collect::<Vec<_>>()[0].len(),
+            input.lines().count(),
+            input.lines().flat_map(|line| line.chars()).collect(),
+        )
     }
 }
