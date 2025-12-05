@@ -11,25 +11,19 @@ pub trait Day: Default + FromStr + Clone + Sized {
     fn after_test_1(&mut self) { }
     fn after_test_2(&mut self) { }
 
-    fn test_1(&self) -> anyhow::Result<()> where <Self as FromStr>::Err: std::error::Error, <Self as FromStr>::Err: Send, <Self as FromStr>::Err: Sync {
+    fn test_1(&self) -> anyhow::Result<()> where <Self as FromStr>::Err: std::error::Error, <Self as FromStr>::Err: Send, <Self as FromStr>::Err: Sync, <Self as FromStr>::Err: 'static {
         for (test_case, result) in Self::test_cases_1() {
-            let day = Self::from_str(test_case);
-
-            if let Ok(mut day) = day {
-                assert_eq!(format!("{}", day.solution1()?), format!("{}", result))
-            }
+            let mut day = Self::from_str(test_case)?;
+            assert_eq!(format!("{}", day.solution1()?), format!("{}", result))
         }
 
         Ok(())
     }
 
-    fn test_2(&self) -> anyhow::Result<()> where <Self as FromStr>::Err: std::error::Error, <Self as FromStr>::Err: Send, <Self as FromStr>::Err: Sync {
+    fn test_2(&self) -> anyhow::Result<()> where <Self as FromStr>::Err: std::error::Error, <Self as FromStr>::Err: Send, <Self as FromStr>::Err: Sync, <Self as FromStr>::Err: 'static {
         for (test_case, result) in Self::test_cases_2() {
-            let day = Self::from_str(test_case);
-
-            if let Ok(mut day) = day {
-                assert_eq!(format!("{}", day.solution2()?), format!("{}", result))
-            }
+            let mut day = Self::from_str(test_case)?;
+            assert_eq!(format!("{}", day.solution2()?), format!("{}", result))
         }
 
         Ok(())
