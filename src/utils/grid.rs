@@ -350,11 +350,23 @@ impl<T> Grid<T> {
         }
     }
 
-    pub fn from_raw_input(input: &str) -> Grid<char> {
-        Grid::<char>::new(
+    pub fn from_raw_input(input: &str) -> Grid<T> where T: From<char> {
+        Grid::<T>::new(
             input.lines().collect::<Vec<_>>()[0].len(),
             input.lines().count(),
-            input.lines().flat_map(|line| line.chars()).collect(),
+            input.lines().flat_map(|line| line.chars()).map(|char| T::from(char)).collect(),
         )
+    }
+}
+
+impl Grid<u8> {
+    pub fn parse_to_u8(input: &str) -> Grid<u8> {
+        let raw: Vec<_> = input.lines().map(str::as_bytes).collect();
+
+        let width = raw[0].len();
+        let height = raw.len();
+        let data= raw.concat();
+
+        Grid { width, height, data }
     }
 }
