@@ -37,7 +37,7 @@ pub trait Day: Default + FromStr + Clone + Sized {
 
 #[derive(Debug)]
 pub enum Error {
-    StringParse(String),
+    Parse(String),
     GridError(crate::utils::grid::Error),
     NoSolutionFound
 }
@@ -50,20 +50,20 @@ impl From<crate::utils::grid::Error> for Error {
 
 impl From<ParseIntError> for Error {
     fn from(value: ParseIntError) -> Self {
-        Error::StringParse(value.to_string())
+        Error::Parse(value.to_string())
     }
 }
 
 impl From<regex::Error> for Error {
     fn from(value: regex::Error) -> Self {
-        Error::StringParse(value.to_string())
+        Error::Parse(value.to_string())
     }
 }
 
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", match self {
-            Error::StringParse(message) => format!("Cannot parse message: \"{message}\""),
+            Error::Parse(message) => format!("Cannot parse message: \"{message}\""),
             Error::NoSolutionFound => "No solution has been found".to_string(),
             Error::GridError(v) => format!("{}", v)
         })

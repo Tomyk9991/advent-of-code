@@ -31,7 +31,7 @@ impl FromStr for Day {
                     match *value {
                         "+" => result.push(Calculation::Add(calculation[j].clone())),
                         "*" => result.push(Calculation::Multiply(calculation[j].clone())),
-                        _ => return Err(crate::aoc::Error::StringParse(format!("Unexpected operator: {}", value))),
+                        _ => return Err(crate::aoc::Error::Parse(format!("Unexpected operator: {}", value))),
                     }
                 }
                 continue;
