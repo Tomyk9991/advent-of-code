@@ -232,6 +232,57 @@ pub struct Vec2 {
     pub y: isize
 }
 
+#[derive(Debug, Default, Copy, Clone, Eq, PartialOrd, PartialEq, Hash)]
+pub struct Vec3 {
+    pub x: i64,
+    pub y: i64,
+    pub z: i64,
+}
+
+impl Vec3 {
+    pub fn distance_squared(&self, other: &Vec3) -> i64 {
+        let dx = self.x - other.x;
+        let dy = self.y - other.y;
+        let dz = self.z - other.z;
+
+        dx * dx + dy * dy + dz * dz
+    }
+}
+
+impl Vec3 {
+    pub fn new(x: i64, y: i64, z: i64) -> Self {
+        Vec3 {
+            x,
+            y,
+            z
+        }
+    }
+}
+
+impl Add for Vec3 {
+    type Output = Vec3;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Vec3 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+        }
+    }
+}
+
+impl Add for &Vec3 {
+    type Output = Vec3;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Vec3 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+        }
+    }
+}
+
 impl Vec2 {
     pub fn new(x: isize, y: isize) -> Self {
         Vec2 {
